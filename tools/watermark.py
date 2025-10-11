@@ -33,7 +33,7 @@ def main():
                         watermark = Image.open(watermark_f)
                         watermark = ImageOps.exif_transpose(watermark)
                         width_wm, height_wm = watermark.size
-                        ratio = width_wm / (max(width, height) * 0.1)
+                        ratio = width_wm / (max(width, height) * 0.15)
                         watermark = watermark.resize(
                             (int(width_wm / ratio), int(height_wm / ratio))
                         )
