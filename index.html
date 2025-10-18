@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Book My Time — Yuyang Wang</title>
+    <title>Door Status — Yuyang Wang</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
       rel="stylesheet"
@@ -226,7 +226,7 @@
   <body>
     <div
       class="stage scale"
-      aria-label="Monochrome door display for e-ink (landscape)"
+      aria-label="Monochrome door display for e‑ink (landscape)"
     >
       <!-- TOP: Status (2/3) -->
       <section class="status-area">
@@ -269,78 +269,139 @@
 
     <script>
       // ===== Config =====
-      const BOOKING_URL =
+      const DEFAULT_BOOKING_URL =
         "https://app.reclaim.ai/m/yuyang-wang/flexible-quick-meeting";
-      // Optional: swap to read remote JSON (uncomment & host a status.json)
-      // const STATUS_SOURCE = new URL('./status.json', location.href).href; // or a Gist raw URL
+      // Provide a remote JSON to drive the page. Use a Gist Raw URL or local status.json during dev.
+      // Example schema below.
+      const STATUS_SOURCE =
+        location.hostname === "localhost" || location.hostname === "127.0.0.1"
+          ? new URL("./status.json", location.href).href
+          : "https://gist.githubusercontent.com/your_user/your_gist_id/raw/status.json"; // <-- replace with your Gist Raw
 
       // Status dictionary: key -> big headline + polite subline (door‑friendly, lightly witty)
       const STATUS_COPY = {
         "in-meeting": {
-          title: "IN MEETING",
-          sub: "On a call — I'll be right back",
+          title: "ON A CALL",
+          sub: "In a conversation — please check back",
         },
         busy: {
-          title: "BUSY",
-          sub: "Heads-down focus — Please knock if urgent",
+          title: "FOCUS TIME",
+          sub: "Work in progress — knock if urgent",
         },
         knock: {
           title: "KNOCK KNOCK",
           sub: "If the door is open, come on in",
         },
         ooo: {
-          title: "OUT OF OFFICE",
-          sub: "Back soon — Please book a time",
+          title: "STEPPED OUT",
+          sub: "Please check back or book a time",
         },
       };
 
       // URL param overrides (?status=in-meeting&sub=...)
       const q = new URLSearchParams(location.search);
-      const statusKey = (q.get("status") || "in-meeting").toLowerCase();
 
-      function setStatus(key) {
+      function setStatus(key, subOverride) {
         const m = STATUS_COPY[key] || STATUS_COPY["in-meeting"];
         document.getElementById("status-text").textContent = m.title;
         document.getElementById("status-sub").textContent =
-          q.get("sub") || m.sub;
+          subOverride || m.sub;
       }
 
-      // Office hours overrides
-      if (q.get("oh1"))
-        document.getElementById("office-line-1").textContent = q.get("oh1");
-      if (q.get("oh2"))
-        document.getElementById("office-line-2").textContent = q.get("oh2");
-      if (q.get("ohnote"))
-        document.getElementById("office-note").textContent = q.get("ohnote");
+      function setOffice(oh) {
+        if (!oh) return;
+        if (typeof oh === "string") {
+          const [l1, l2] = oh.split(" @ ");
+          if (l1)
+            document.getElementById("office-line-1").textContent = l1.trim();
+          if (l2)
+            document.getElementById("office-line-2").textContent = l2.trim();
+        } else if (typeof oh === "object") {
+          if (oh.line1)
+            document.getElementById("office-line-1").textContent = oh.line1;
+          if (oh.line2)
+            document.getElementById("office-line-2").textContent = oh.line2;
+          if (oh.note)
+            document.getElementById("office-note").textContent = oh.note;
+        }
+      }
 
-      // QR: render via external generator as a pure black mask to avoid anti‑aliasing gray
       function setQR(url) {
+        const u = url || DEFAULT_BOOKING_URL;
         const size = 1200; // high‑res for crisp downscale on e‑ink
         const api = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(
-          url
+          u
         )}&color=000000&bgcolor=FFFFFF`;
         const $qr = document.getElementById("qr");
-        // Use the PNG as a CSS mask -> solid black foreground, ensures binary output on panel
         $qr.style.webkitMaskImage = `url(${api})`;
         $qr.style.maskImage = `url(${api})`;
       }
 
-      function init() {
-        setStatus(statusKey);
-        setQR(BOOKING_URL);
-        // Optional: fetch STATUS_SOURCE to drive status dynamically
-        // try{ fetch(STATUS_SOURCE,{cache:'no-store'}).then(r=>r.json()).then(js=>{
-        //   if(js.status) setStatus(String(js.status).toLowerCase());
-        //   if(js.office_hours){
-        //     const [l1,l2] = String(js.office_hours).split(' @ ');
-        //     if(l1) document.getElementById('office-line-1').textContent = l1.trim();
-        //     if(l2) document.getElementById('office-line-2').textContent = l2.trim();
-        //   }
-        //   if(js.booking_url) setQR(js.booking_url);
-        // }); }catch(e){}
+      function applyFromJson(js) {
+        const k = String(js.status || "").toLowerCase();
+        const sub = js.sub || undefined;
+        setStatus(k || "in-meeting", sub);
+
+        setOffice(js.office || js.office_hours);
+
+        const booking = js.booking_url || DEFAULT_BOOKING_URL;
+        setQR(booking);
+
+        // Optional CTA override
+        if (js.cta) document.getElementById("cta").innerHTML = js.cta;
+        if (js.qr_note)
+          document.getElementById("qr-note").textContent = js.qr_note;
       }
 
-      init();
+      async function load() {
+        // Defaults first (in case fetch fails)
+        setStatus("in-meeting");
+        setQR(DEFAULT_BOOKING_URL);
+
+        try {
+          const res = await fetch(STATUS_SOURCE, {
+            cache: "no-store",
+            headers: { Accept: "application/json" },
+          });
+          if (res.ok) {
+            const js = await res.json();
+            applyFromJson(js);
+          }
+        } catch (e) {
+          /* silent fallback */
+        }
+
+        // URL overrides have the final say
+        const s = (q.get("status") || "").toLowerCase();
+        if (s) setStatus(s, q.get("sub") || undefined);
+        if (q.get("oh1"))
+          document.getElementById("office-line-1").textContent = q.get("oh1");
+        if (q.get("oh2"))
+          document.getElementById("office-line-2").textContent = q.get("oh2");
+        if (q.get("ohnote"))
+          document.getElementById("office-note").textContent = q.get("ohnote");
+        if (q.get("cta"))
+          document.getElementById("cta").innerHTML = q.get("cta");
+        if (q.get("qr")) setQR(q.get("qr"));
+      }
+
+      load();
     </script>
-  </body>
+
+    <!--
+  ===== Sample status.json (either local or Gist Raw) =====
+  {
+    "status": "busy",                    // in-meeting | busy | knock | ooo
+    "sub": "Back at 14:30 / 14:30 返回", // optional subline override
+    "office": {                           // or use "office_hours": "Mon 14:00–16:00 @ ECE Room 3xx"
+      "line1": "Mon 14:00–16:00",
+      "line2": "ECE Building Room 3xx",
+      "note":  "Walk-ins welcome • 以现场为准"
+    },
+    "booking_url": "https://app.reclaim.ai/m/yuyang-wang/flexible-quick-meeting",
+    "cta": "Can’t make any?<br/>Book my time →", // optional HTML
+    "qr_note": "Scan to open booking page",
+    "updated_at": "2025-10-17T10:00:00-04:00"
+  }
+  --></body>
 </html>
