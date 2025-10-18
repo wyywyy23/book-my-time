@@ -1,395 +1,215 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Yuyang Wang • Status & Office Hours</title>
-    <meta name="color-scheme" content="light dark" />
+    <title>E‑ink Status Page — Mock</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      /* --- Design constants (monochrome) --- */
       :root {
-        --bg: #0b0c0f;
-        --card: #111319;
-        --muted: #8a93a6;
-        --fg: #e6e9ef;
-        --ok: #22c55e;
-        --warn: #f59e0b;
-        --err: #ef4444;
-        --info: #3b82f6;
-        --shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-      }
-      @media (prefers-color-scheme: light) {
-        :root {
-          --bg: #f7f8fa;
-          --card: #ffffff;
-          --muted: #556079;
-          --fg: #0f172a;
-        }
+        --design-w: 1080; /* px */
+        --design-h: 1620; /* px (2:3 portrait) */
+        --fg: #000;
+        --bg: #fff;
+        --g1: #111;
+        --g2: #222;
+        --g3: #333;
+        --g6: #666;
+        --g9: #999;
+        --gC: #ccc;
+        --gE: #eee;
       }
       html,
       body {
         height: 100%;
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
       }
       body {
-        margin: 0;
-        background: radial-gradient(
-            1200px 700px at 80% -100px,
-            rgba(59, 130, 246, 0.25),
-            transparent
-          ),
-          radial-gradient(
-            900px 600px at -10% 120%,
-            rgba(34, 197, 94, 0.2),
-            transparent
-          ),
-          var(--bg);
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-        color: var(--fg);
         display: grid;
-        place-items: center;
-        padding: 32px;
+        place-items: start;
       }
-      .wrap {
-        width: min(900px, 100%);
-        display: grid;
-        gap: 18px;
+
+      /* Scale the whole design to exactly fit viewport width (no reflow) */
+      .stage {
+        width: calc(var(--design-w) * 1px);
+        height: calc(var(--design-h) * 1px);
+        position: relative;
+        background: #fff;
       }
-      .card {
-        background: var(--card);
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        border-radius: 20px;
-        padding: 22px;
-        box-shadow: var(--shadow);
+      .scale {
+        transform-origin: top left;
+        transform: scale(calc(100vw / (var(--design-w) * 1px)));
       }
-      .row {
-        display: flex;
-        gap: 14px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      .grow {
-        flex: 1;
-      }
-      h1 {
-        margin: 0;
-        font-size: clamp(20px, 4vw, 28px);
-        letter-spacing: 0.2px;
-      }
-      p {
-        margin: 0.25rem 0;
-        color: var(--muted);
-      }
-      .pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        border-radius: 999px;
-        font-weight: 600;
-        border: 1px solid rgba(148, 163, 184, 0.25);
-      }
-      .dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 999px;
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06) inset;
-      }
-      .busy {
-        background: rgba(239, 68, 68, 0.12);
-        color: #fecaca;
-        border-color: rgba(239, 68, 68, 0.35);
-      }
-      .free {
-        background: rgba(34, 197, 94, 0.12);
-        color: #bbf7d0;
-        border-color: rgba(34, 197, 94, 0.35);
-      }
-      .meeting {
-        background: rgba(59, 130, 246, 0.12);
-        color: #bfdbfe;
-        border-color: rgba(59, 130, 246, 0.35);
-      }
-      .ooo {
-        background: rgba(245, 158, 11, 0.12);
-        color: #fde68a;
-        border-color: rgba(245, 158, 11, 0.35);
-      }
-      .knock {
-        background: rgba(99, 102, 241, 0.12);
-        color: #ddd6fe;
-        border-color: rgba(99, 102, 241, 0.35);
-      }
-      .btn {
-        appearance: none;
-        border: 1px solid rgba(148, 163, 184, 0.35);
-        background: transparent;
-        color: var(--fg);
-        padding: 10px 14px;
-        border-radius: 12px;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      .btn:hover {
-        border-color: rgba(148, 163, 184, 0.6);
-      }
-      .muted {
-        color: var(--muted);
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        gap: 18px;
-      }
-      @media (max-width: 800px) {
-        .grid {
-          grid-template-columns: 1fr;
+
+      /* Prevent vertical scrollbar by matching body height to scaled canvas */
+      @media (min-width: 0px) {
+        body {
+          min-height: calc(100vw * (var(--design-h) / var(--design-w)));
+          overflow: hidden;
         }
       }
-      .qr {
-        border-radius: 16px;
-        overflow: hidden;
-        background: linear-gradient(
-          180deg,
-          rgba(148, 163, 184, 0.15),
-          transparent
-        );
-        padding: 14px;
+
+      /* --- Grid layout: Top 2/3 status, Bottom 1/3 split left/right --- */
+      .status-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 66.666%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .status-inner {
+        text-align: center;
+        padding: 40px;
+        width: 100%;
+      }
+      .status-tag {
+        display: inline-block;
+        border: 6px solid var(--g2);
+        padding: 18px 28px;
+        font: 800 40px/1 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial;
+        letter-spacing: 2px;
+        color: var(--g2);
+      }
+      .status-text {
+        font: 800 200px/0.95 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial;
+        letter-spacing: -1px;
+        margin: 28px 0 16px;
+        color: #000;
+      }
+      .status-sub {
+        font: 600 40px/1.4 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial;
+        color: #000;
+        opacity: 0.75;
+      }
+
+      .divider {
+        position: absolute;
+        left: 0;
+        top: 66.666%;
+        width: 100%;
+        height: 0;
+        border-top: 8px solid #000;
+      }
+
+      .bottom {
+        position: absolute;
+        left: 0;
+        top: 66.666%;
+        width: 100%;
+        height: 33.333%;
         display: grid;
-        place-items: center;
+        grid-template-columns: 1fr 1fr;
       }
-      .mono {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas,
-          "Liberation Mono", monospace;
+
+      .panel {
+        padding: 40px 48px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
       }
-      a {
-        color: inherit;
+      .panel + .panel {
+        border-left: 8px solid #000;
+      }
+
+      .heading {
+        font: 800 48px/1.2 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial;
+        margin: 0 0 18px 0;
+      }
+      .text {
+        font: 600 36px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial;
+        color: #000;
+        margin: 0;
+      }
+
+      /* QR block */
+      .qr-row {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 28px;
+        align-items: center;
+      }
+      .qr {
+        width: 280px;
+        height: 280px;
+        background: #000;
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="white"/><rect x="8" y="8" width="28" height="28" fill="black"/><rect x="84" y="8" width="28" height="28" fill="black"/><rect x="8" y="84" width="28" height="28" fill="black"/><rect x="40" y="40" width="40" height="40" fill="black"/><rect x="92" y="64" width="12" height="12" fill="black"/><rect x="64" y="92" width="12" height="12" fill="black"/></svg>')
+          center/cover no-repeat;
+      }
+      .cta {
+        font: 800 40px/1.2 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial;
+      }
+      .muted {
+        color: #000;
+        opacity: 0.65;
+        font: 600 32px/1.4 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial;
+      }
+
+      /* Light hairlines for e‑ink clarity */
+      .hair {
+        border-top: 2px solid #000;
+        opacity: 0.2;
+        margin-top: 14px;
       }
     </style>
   </head>
   <body>
     {% include favicon.html %}
-    <main class="wrap">
-      <section class="card">
-        <div class="row">
-          <div class="grow">
-            <h1>Book My Time</h1>
-            <p>Live status • Office hours • Quick booking</p>
-          </div>
-          <button id="refresh" class="btn" title="Reload status">
-            ↻ Refresh
-          </button>
+    <div
+      class="stage scale"
+      role="img"
+      aria-label="Monochrome design mockup for e‑ink status page"
+    >
+      <!-- TOP: Status (2/3) -->
+      <section class="status-area">
+        <div class="status-inner">
+          <div class="status-tag">STATUS</div>
+          <div class="status-text">IN MEETING</div>
+          <p class="status-sub">Please check back later • 请稍后再来</p>
         </div>
       </section>
 
-      <section class="card grid">
-        <div>
-          <div class="row" style="justify-content: space-between">
-            <div class="row">
-              <span id="status-pill" class="pill free"
-                ><span class="dot" style="background: var(--ok)"></span
-                ><span id="status-text">Free</span></span
-              >
+      <div class="divider" aria-hidden="true"></div>
+
+      <!-- BOTTOM: split 1/3 into two columns -->
+      <section class="bottom">
+        <!-- Left: Office hours -->
+        <div class="panel">
+          <h2 class="heading">Office Hours</h2>
+          <p class="text">Mon 14:00–16:00</p>
+          <p class="text">ECE Building Room 3xx</p>
+          <div class="hair"></div>
+          <p class="muted">欢迎直接来访（以现场为准）</p>
+        </div>
+
+        <!-- Right: CTA + QR -->
+        <div class="panel">
+          <div class="qr-row">
+            <div class="qr" aria-label="QR placeholder"></div>
+            <div>
+              <div class="cta">Can’t make any?<br />Book my time →</div>
+              <p class="muted" style="margin-top: 10px">
+                Scan the code to open booking page
+              </p>
             </div>
-            <div class="muted mono" id="last-updated">—</div>
-          </div>
-          <div style="margin-top: 12px">
-            <p id="status-msg" style="font-size: 1.05rem; line-height: 1.6">
-              欢迎👋 现在可以直接预订或者在我的 office hour 来访。
-            </p>
-            <p class="muted" id="until"></p>
-          </div>
-
-          <div style="margin-top: 18px">
-            <h3 style="margin: 0 0 8px 0; font-size: 1rem">Office Hours</h3>
-            <p id="office-hours" class="mono">
-              Mon 14:00–16:00 @ ECE Building Room 3xx
-            </p>
-          </div>
-
-          <div style="margin-top: 18px" class="row">
-            <a id="book-btn" class="btn" href="#" target="_blank" rel="noopener"
-              >Open Booking Page →</a
-            >
-            <button id="copy-link" class="btn" title="Copy booking link">
-              Copy link
-            </button>
           </div>
         </div>
-        <div>
-          <div class="qr">
-            <img
-              id="qr"
-              alt="Booking QR Code"
-              width="320"
-              height="320"
-              loading="lazy"
-            />
-          </div>
-          <p class="muted" style="text-align: center; margin-top: 10px">
-            用手机扫码进入预订页面
-          </p>
-        </div>
       </section>
-
-      <section class="card">
-        <details>
-          <summary class="row" style="cursor: pointer">
-            <strong>How this works</strong
-            ><span class="muted">(可选：通过 JSON 远程更新状态)</span>
-          </summary>
-          <div style="margin-top: 10px">
-            <p>
-              默认从一个
-              <span class="mono">status.json</span>
-              拉取状态。你可以把它放在同一仓库的
-              <span class="mono">/book-my-time/status.json</span>，或放在一个
-              GitHub Gist Raw 链接，然后把地址填到下面的
-              <span class="mono">STATUS_SOURCE</span>。
-            </p>
-            <pre
-              class="mono"
-              style="
-                white-space: pre-wrap;
-                background: rgba(148, 163, 184, 0.12);
-                padding: 12px;
-                border-radius: 12px;
-                overflow: auto;
-              "
-            >
-{
-  "status": "free",            // free | busy | meeting | ooo | knock
-  "message": "",
-  "until": "2025-10-17T15:00:00-04:00",
-  "office_hours": "Mon 14:00–16:00 @ ECE Building Room 3xx",
-  "booking_url": "https://cal.com/your-id"  // 或其它预约链接
-}
-</pre
-            >
-            <p>
-              也支持用 URL 查询参数临时覆盖：<span class="mono"
-                >?status=busy&msg=…&until=…</span
-              >（仅本地会话）。
-            </p>
-          </div>
-        </details>
-      </section>
-    </main>
-
-    <script>
-      // ======== CONFIG ========
-      // 1) 如果你把 status.json 放在同一仓库的 /book-my-time/status.json：
-      // const STATUS_SOURCE = new URL('./status.json', location.href).href;
-      // 2) 或者使用 GitHub Gist 的 Raw 链接（推荐配合手机快捷指令一键更新）：
-      const STATUS_SOURCE =
-        "https://gist.githubusercontent.com/your_user/your_gist_id/raw/status.json"; // <-- 替换为你的 Raw 链接
-
-      // 预约链接（作为兜底；若 JSON 中提供 booking_url 则以 JSON 为准）
-      const FALLBACK_BOOKING_URL = "https://cal.com/your-id"; // <-- 替换为你的预约地址
-
-      // 二维码服务（无需前端库）
-      function qrUrl(data) {
-        const u = encodeURIComponent(data);
-        // api.qrserver.com 简单可靠；你也可以换成 Google Charts 或本地库
-        return `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${u}`;
-      }
-
-      const $ = (sel) => document.querySelector(sel);
-      const stateMap = {
-        free: { cls: "free", label: "Free", color: "var(--ok)" },
-        busy: { cls: "busy", label: "Busy", color: "var(--err)" },
-        meeting: { cls: "meeting", label: "In meeting", color: "var(--info)" },
-        ooo: { cls: "ooo", label: "Out of office", color: "var(--warn)" },
-        knock: { cls: "knock", label: "Knock welcome", color: "#a78bfa" },
-      };
-
-      function setStatus(v) {
-        const m = stateMap[v] || stateMap.free;
-        const pill = $("#status-pill");
-        pill.className = `pill ${m.cls}`;
-        $("#status-text").textContent = m.label;
-        pill.querySelector(".dot").style.background = m.color;
-      }
-
-      function setUpdated(ts) {
-        const d = ts ? new Date(ts) : new Date();
-        const f = d.toLocaleString(undefined, { hour12: false });
-        $("#last-updated").textContent = `Updated ${f}`;
-      }
-
-      function setBooking(url) {
-        const u = url || FALLBACK_BOOKING_URL;
-        $("#book-btn").href = u;
-        $("#qr").src = qrUrl(u);
-        $("#copy-link").onclick = async () => {
-          try {
-            await navigator.clipboard.writeText(u);
-            $("#copy-link").textContent = "Copied!";
-            setTimeout(() => ($("#copy-link").textContent = "Copy link"), 1200);
-          } catch (e) {}
-        };
-      }
-
-      function setOfficeHours(text) {
-        $("#office-hours").textContent = text || $("#office-hours").textContent;
-      }
-
-      function setMessage(text) {
-        $("#status-msg").textContent = text || $("#status-msg").textContent;
-      }
-
-      function setUntil(iso) {
-        const el = $("#until");
-        if (!iso) {
-          el.textContent = "";
-          return;
-        }
-        const d = new Date(iso);
-        if (isNaN(+d)) {
-          el.textContent = "";
-          return;
-        }
-        const s = d.toLocaleString(undefined, { hour12: false });
-        el.textContent = `有效期至：${s}`;
-      }
-
-      async function load() {
-        // 允许用 URL 查询参数快速本地覆盖
-        const q = new URLSearchParams(location.search);
-        const override = Object.fromEntries(q.entries());
-
-        try {
-          const res = await fetch(STATUS_SOURCE, { cache: "no-store" });
-          if (!res.ok) throw new Error("status.json not reachable");
-          const js = await res.json();
-          apply(js);
-        } catch (err) {
-          // 如果拉取失败，使用本地兜底 + 覆盖
-          apply({
-            status: "free",
-            message: "",
-            until: "",
-            office_hours: undefined,
-            booking_url: undefined,
-          });
-        }
-
-        // 覆盖（仅当前访问者可见，不影响远端 JSON）
-        if (override.status) setStatus(override.status);
-        if (override.msg) setMessage(override.msg);
-        if (override.until) setUntil(override.until);
-      }
-
-      function apply(js) {
-        setStatus(js.status);
-        setMessage(js.message);
-        setUntil(js.until);
-        setOfficeHours(js.office_hours);
-        setBooking(js.booking_url);
-        setUpdated(js.updated_at || Date.now());
-      }
-
-      $("#refresh").addEventListener("click", load);
-      load();
-    </script>
+    </div>
   </body>
 </html>
