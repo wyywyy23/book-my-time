@@ -204,6 +204,15 @@
         mask: center/contain no-repeat;
         -webkit-mask: center/contain no-repeat;
       }
+      .qr-img {
+        width: 360px;
+        height: 360px;
+        display: block;
+        /* 让电子墨水屏呈现硬边不糊 */
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        background: #fff;
+      }
 
       .cta {
         font: 800 48px/1.15 Inter, system-ui, -apple-system, Segoe UI, Roboto,
@@ -255,7 +264,14 @@
         <!-- Right: CTA + QR -->
         <div class="panel">
           <div class="qr-row">
-            <div class="qr" id="qr"></div>
+            <img
+              class="qr-img"
+              id="qr"
+              alt="QR code"
+              width="360"
+              height="360"
+              decoding="sync"
+            />
             <div>
               <div class="cta" id="cta">
                 Can't make any?<br />Book my time →
@@ -332,13 +348,26 @@
 
       function setQR(url) {
         const u = url || DEFAULT_BOOKING_URL;
-        const size = 1200; // high‑res for crisp downscale on e‑ink
-        const api = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(
+        const $qr = document.getElementById("qr");
+
+        // 1) 先尝试 SVG（矢量，缩放清晰）
+        const svgUrl = `https://api.qrserver.com/v1/create-qr-code/?format=svg&size=360x360&data=${encodeURIComponent(
           u
         )}&color=000000&bgcolor=FFFFFF`;
-        const $qr = document.getElementById("qr");
-        $qr.style.webkitMaskImage = `url(${api})`;
-        $qr.style.maskImage = `url(${api})`;
+
+        // 2) 兜底 PNG（高分辨率，保证清晰）
+        const pngUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&data=${encodeURIComponent(
+          u
+        )}&color=000000&bgcolor=FFFFFF`;
+
+        // 先设 SVG
+        $qr.src = svgUrl;
+
+        // 如果 SVG 加载异常则回退到 PNG
+        $qr.onerror = () => {
+          $qr.onerror = null;
+          $qr.src = pngUrl;
+        };
       }
 
       function applyFromJson(js) {
