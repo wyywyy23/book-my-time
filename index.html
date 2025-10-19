@@ -274,7 +274,7 @@
                 Can't make any?<br />Book my time →
               </div>
               <p class="footnote" id="qr-note">Scan to open booking page</p>
-              <p class="footnote" id="qr-note">
+              <p class="script" id="qr-script">
                 🚧 Experimental, feedback welcome 🚧
               </p>
             </div>
@@ -392,6 +392,8 @@
         if (js.cta) document.getElementById("cta").innerHTML = js.cta;
         if (js.qr_note)
           document.getElementById("qr-note").textContent = js.qr_note;
+        if (js.qr_script)
+          document.getElementById("qr-script").textContent = js.qr_script;
       }
 
       async function load() {
