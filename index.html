@@ -293,7 +293,7 @@
         "https://app.reclaim.ai/m/yuyang-wang/flexible-quick-meeting";
       // Provide a remote JSON to drive the page. Use a Gist Raw URL or local status.json during dev.
       // Example schema below.
-      const STATUS_SOURCE = new URL("./status.json", location.href).href;
+      const STATUS_SOURCE = "./status.json";
 
       // Status dictionary: key -> big headline + polite subline (door‑friendly, lightly witty)
       const STATUS_COPY = {
@@ -390,19 +390,24 @@
       }
 
       async function load() {
-        // 默认占位
         setStatus("in-meeting");
         setQR(DEFAULT_BOOKING_URL);
 
-        try{
-            const url = new URL(STATUS_SOURCE);
-            url.searchParams.set("_ts", Date.now()); // 防缓存
-            const res = await fetch(url, {cache:"no-store", headers:{Accept:"application/json"}});
-            if(res.ok){
-                const js = await res.json();
-                applyFromJson(js);
-            }
-        }catch(e){}
+        try {
+          const url = new URL(STATUS_SOURCE, location.href);
+          url.searchParams.set("_ts", Date.now()); // 每次加载都不同
+          console.log("fetching:", url.toString());
+          const res = await fetch(url, { cache: "no-store" });
+          if (res.ok) {
+            const js = await res.json();
+            applyFromJson(js);
+            console.log("applied:", js);
+          } else {
+            console.warn("fetch failed:", res.status);
+          }
+        } catch (e) {
+          console.error(e);
+        }
 
         // URL overrides（保留你的原逻辑）
         const s = (q.get("status") || "").toLowerCase();
