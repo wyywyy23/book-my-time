@@ -1,14 +1,14 @@
 {
-  "status": "weekend",            // values：in-meeting | busy | knock | ooo | weekend
-  "office": {                        // use this or "office_hours"
+  "status": "weekend",
+  "office": {
     "line1": "Mon/Wed/Fri after class",
     "line2": "Tue/Thu 14:00-15:00 ITE 461",
     "note": "Walk-ins welcome in these hours"
   },
-  "office_hours": "Tue/Thu 14:00-15:00 ITE 461",  // alternative to above
+  "office_hours": "Tue/Thu 14:00-15:00 ITE 461",
   "booking_url": "https://app.reclaim.ai/m/yuyang-wang/flexible-quick-meeting",
   "cta": "Can’t make any?<br/>Book my time →",
   "qr_note": "Scan to open booking page",
   "qr_script": "🚧 Experimental; feedback welcome 🚧",
-  "updated_at": "2025-10-24T10:00:00-04:00"      // for record only
+  "updated_at": "2025-10-24T10:00:00-04:00"
 }
