@@ -319,9 +319,6 @@
         },
       };
 
-      // URL param overrides (?status=in-meeting&sub=...)
-      const q = new URLSearchParams(location.search);
-
       function setStatus(key, subOverride) {
         const m = STATUS_COPY[key] || STATUS_COPY["in-meeting"];
         document.getElementById("status-text").textContent = m.title;
@@ -372,8 +369,12 @@
       }
 
       function applyFromJson(js) {
-        const k = String(js.status || "").toLowerCase();
+        const raw = js.status;
+        const k = String(raw || "")
+          .trim()
+          .toLowerCase(); // ← 加 trim()
         const sub = js.sub || undefined;
+        console.log("[status] parsed:", { raw, k });
         setStatus(k || "in-meeting", sub);
 
         setOffice(js.office || js.office_hours);
@@ -381,7 +382,6 @@
         const booking = js.booking_url || DEFAULT_BOOKING_URL;
         setQR(booking);
 
-        // Optional CTA override
         if (js.cta) document.getElementById("cta").innerHTML = js.cta;
         if (js.qr_note)
           document.getElementById("qr-note").textContent = js.qr_note;
@@ -408,19 +408,6 @@
         } catch (e) {
           console.error(e);
         }
-
-        // URL overrides（保留你的原逻辑）
-        const s = (q.get("status") || "").toLowerCase();
-        if (s) setStatus(s, q.get("sub") || undefined);
-        if (q.get("oh1"))
-          document.getElementById("office-line-1").textContent = q.get("oh1");
-        if (q.get("oh2"))
-          document.getElementById("office-line-2").textContent = q.get("oh2");
-        if (q.get("ohnote"))
-          document.getElementById("office-note").textContent = q.get("ohnote");
-        if (q.get("cta"))
-          document.getElementById("cta").innerHTML = q.get("cta");
-        if (q.get("qr")) setQR(q.get("qr"));
       }
 
       load();
