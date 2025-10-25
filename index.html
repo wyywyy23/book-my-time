@@ -293,10 +293,7 @@
         "https://app.reclaim.ai/m/yuyang-wang/flexible-quick-meeting";
       // Provide a remote JSON to drive the page. Use a Gist Raw URL or local status.json during dev.
       // Example schema below.
-      const STATUS_SOURCE =
-        location.hostname === "localhost" || location.hostname === "127.0.0.1"
-          ? new URL("./status.json", location.href).href
-          : "https://api.github.com/gists/f96b0e927c21a42d247b626dceae243e"; // 用 API，有 CORS
+      const STATUS_SOURCE = new URL("./status.json", location.href).href;
 
       // Status dictionary: key -> big headline + polite subline (door‑friendly, lightly witty)
       const STATUS_COPY = {
@@ -397,41 +394,15 @@
         setStatus("in-meeting");
         setQR(DEFAULT_BOOKING_URL);
 
-        try {
-          if (STATUS_SOURCE.includes("api.github.com/gists/")) {
-            // 通过 API 读 gist -> files.status.json.content
+        try{
             const url = new URL(STATUS_SOURCE);
-            url.searchParams.set("_ts", Date.now()); // 防缓存（对某些代理依然有用）
-            const res = await fetch(url, {
-              cache: "no-store",
-              headers: { Accept: "application/vnd.github+json" },
-            });
-            if (res.ok) {
-              const data = await res.json();
-              const file =
-                data.files &&
-                (data.files["status.json"] || data.files["status.JSON"]);
-              if (file && file.content) {
-                const js = JSON.parse(file.content); // 这里把文本解析成对象
+            url.searchParams.set("_ts", Date.now()); // 防缓存
+            const res = await fetch(url, {cache:"no-store", headers:{Accept:"application/json"}});
+            if(res.ok){
+                const js = await res.json();
                 applyFromJson(js);
-              }
             }
-          } else {
-            // 本地开发 or 你真的用的是同源 JSON
-            const url = new URL(STATUS_SOURCE);
-            url.searchParams.set("_ts", Date.now());
-            const res = await fetch(url, {
-              cache: "no-store",
-              headers: { Accept: "application/json" },
-            });
-            if (res.ok) {
-              const js = await res.json();
-              applyFromJson(js);
-            }
-          }
-        } catch (e) {
-          // 静默兜底
-        }
+        }catch(e){}
 
         // URL overrides（保留你的原逻辑）
         const s = (q.get("status") || "").toLowerCase();
