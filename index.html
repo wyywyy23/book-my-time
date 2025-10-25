@@ -293,7 +293,11 @@
         "https://app.reclaim.ai/m/yuyang-wang/flexible-quick-meeting";
       // Provide a remote JSON to drive the page. Use a Gist Raw URL or local status.json during dev.
       // Example schema below.
-      const STATUS_SOURCE = "./status.json";
+      // ---- 改成你的 Gist 信息 ----
+      const GIST_ID = "f96b0e927c21a42d247b626dceae243e";
+      const GIST_FILE = "status.json";
+      const STATUS_SOURCE = `https://api.github.com/gists/${GIST_ID}`;
+      // ----------------------------
 
       // Status dictionary: key -> big headline + polite subline (door‑friendly, lightly witty)
       const STATUS_COPY = {
@@ -320,7 +324,7 @@
       };
 
       function setStatus(key, subOverride) {
-        const m = STATUS_COPY[key] || STATUS_COPY["in-meeting"];
+        const m = STATUS_COPY[key] || STATUS_COPY["busy"];
         document.getElementById("status-text").textContent = m.title;
         document.getElementById("status-sub").textContent =
           subOverride || m.sub;
@@ -375,7 +379,7 @@
           .toLowerCase(); // ← 加 trim()
         const sub = js.sub || undefined;
         console.log("[status] parsed:", { raw, k });
-        setStatus(k || "in-meeting", sub);
+        setStatus(k || "busy", sub);
 
         setOffice(js.office || js.office_hours);
 
@@ -390,23 +394,56 @@
       }
 
       async function load() {
+        // 默认显示占位内容（以防网络失败）
         setStatus("in-meeting");
         setQR(DEFAULT_BOOKING_URL);
 
         try {
-          const url = new URL(STATUS_SOURCE, location.href);
-          url.searchParams.set("_ts", Date.now()); // 每次加载都不同
-          console.log("fetching:", url.toString());
-          const res = await fetch(url, { cache: "no-store" });
-          if (res.ok) {
-            const js = await res.json();
-            applyFromJson(js);
-            console.log("applied:", js);
-          } else {
-            console.warn("fetch failed:", res.status);
+          // 1️⃣ 通过 GitHub API 拉取 Gist（而不是 Raw 链接）
+          const url = new URL(STATUS_SOURCE);
+          url.searchParams.set("_ts", Date.now()); // 防缓存
+          const res = await fetch(url.toString(), {
+            cache: "no-store",
+            headers: { Accept: "application/vnd.github+json" },
+          });
+
+          // 2️⃣ 网络错误或非 2xx 时直接返回
+          if (!res.ok) {
+            console.warn("Gist fetch failed:", res.status);
+            return;
           }
+
+          // 3️⃣ 解析 JSON（包含多个文件）
+          const data = await res.json();
+          const file =
+            data.files &&
+            (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
+          if (!file || !file.content) {
+            console.warn("Gist file not found:", GIST_FILE);
+            return;
+          }
+
+          // 4️⃣ 允许文件中出现 // 或 /* */ 注释
+          const clean = stripJsonComments(file.content);
+
+          // 5️⃣ 尝试解析为对象
+          let js;
+          try {
+            js = JSON.parse(clean);
+          } catch (e) {
+            console.error("JSON parse error:", e);
+            document.getElementById("status-sub").textContent =
+              "status.json parse error";
+            return;
+          }
+
+          // 6️⃣ 成功解析后更新页面
+          applyFromJson(js);
+          console.log("[status] applied:", js);
         } catch (e) {
-          console.error(e);
+          console.error("Gist load error:", e);
+          document.getElementById("status-sub").textContent =
+            "status.json fetch error";
         }
       }
 
