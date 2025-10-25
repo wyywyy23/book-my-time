@@ -263,7 +263,9 @@
           <p class="t" id="office-line-1">Mon/Wed/Fri after class</p>
           <p class="t" id="office-line-2">Tue/Thu 14:00-15:00 ITE 461</p>
           <div class="hair"></div>
-          <p class="t muted" id="office-note">Walk-ins welcome in these hours</p>
+          <p class="t muted" id="office-note">
+            Walk-ins welcome in these hours
+          </p>
         </div>
 
         <!-- Right: CTA + QR -->
@@ -294,7 +296,7 @@
       const STATUS_SOURCE =
         location.hostname === "localhost" || location.hostname === "127.0.0.1"
           ? new URL("./status.json", location.href).href
-          : "https://gist.githubusercontent.com/wyywyy23/f96b0e927c21a42d247b626dceae243e/raw/0064f1102dd5fddb421c6e6b599a2054b82a0d8f/status.json"; // <-- replace with your Gist Raw
+          : "https://gist.githubusercontent.com/wyywyy23/f96b0e927c21a42d247b626dceae243e/raw/status.json"; // <-- replace with your Gist Raw
 
       // Status dictionary: key -> big headline + polite subline (door‑friendly, lightly witty)
       const STATUS_COPY = {
@@ -396,7 +398,9 @@
         setQR(DEFAULT_BOOKING_URL);
 
         try {
-          const res = await fetch(STATUS_SOURCE, {
+          const url = new URL(STATUS_SOURCE);
+          url.searchParams.set("_ts", Date.now()); // 防缓存
+          const res = await fetch(url, {
             cache: "no-store",
             headers: { Accept: "application/json" },
           });
@@ -424,5 +428,5 @@
 
       load();
     </script>
-    </body>
+  </body>
 </html>
