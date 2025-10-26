@@ -372,6 +372,67 @@
         };
       }
 
+      // —— 安全去注释：支持 // 与 /* */，避免误删字符串里的 // ——
+      function stripJsonComments(input) {
+        let out = "",
+          inStr = false,
+          esc = false,
+          inBlk = false,
+          inLine = false,
+          quote = "";
+        for (let i = 0; i < input.length; i++) {
+          const c = input[i],
+            n = input[i + 1];
+          if (inLine) {
+            if (c === "\n") {
+              inLine = false;
+              out += c;
+            }
+            continue;
+          }
+          if (inBlk) {
+            if (c === "*" && n === "/") {
+              inBlk = false;
+              i++;
+            }
+            continue;
+          }
+          if (inStr) {
+            out += c;
+            if (esc) {
+              esc = false;
+              continue;
+            }
+            if (c === "\\") {
+              esc = true;
+              continue;
+            }
+            if (c === quote) {
+              inStr = false;
+            }
+            continue;
+          }
+          if (c === "/" && n === "/") {
+            inLine = true;
+            i++;
+            continue;
+          }
+          if (c === "/" && n === "*") {
+            inBlk = true;
+            i++;
+            continue;
+          }
+          if (c === '"' || c === "'") {
+            inStr = true;
+            quote = c;
+            out += c;
+            continue;
+          }
+          out += c;
+        }
+        return out;
+      }
+
       function applyFromJson(js) {
         const raw = js.status;
         const k = String(raw || "")
