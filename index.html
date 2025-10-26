@@ -113,17 +113,27 @@
       /* Layout: Top 2/3 status; Bottom 1/3 split left/right */
       .status-area {
         position: absolute;
-        inset: 0 auto auto 0;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 66.666%;
         display: flex;
-        align-items: center;
-        justify-content: center;
+        flex-direction: column; /* 竖向排布三行文字 */
+        justify-content: center; /* 垂直居中 */
+        align-items: center; /* 水平居中 */
         text-align: center;
-        padding: 40px 60px;
+        padding: 0; /* 去掉 40px/60px 的内边距偏移 */
       }
       .status-wrap {
-        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* 文字块水平居中 */
+        text-align: center;
+        width: auto; /* 不再占满 100%，避免看起来偏右 */
+        max-width: 100%;
+        transform: translateX(
+          -0.5%
+        ); /* 轻微左移，修正视觉中心；需要可改为 -1%/-0.25% */
       }
 
       .status-tag {
