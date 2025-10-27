@@ -184,7 +184,7 @@
         padding: 36px 48px;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start; /* ← 改为顶部对齐，不让内容平均分布 */
       }
       .panel + .panel {
         border-left: 10px solid var(--line);
@@ -256,6 +256,7 @@
       .oh-title {
         font: 800 48px/1.2 Inter, system-ui, -apple-system, Segoe UI, Roboto,
           Helvetica, Arial;
+        margin-bottom: 8px; /* ← 新增，原默认0，适度留白 */
       }
 
       /* Office Hours 标题右侧小注 */
@@ -270,7 +271,7 @@
       /* 左下周时间轴整体 */
       .oh {
         display: grid;
-        gap: 10px;
+        gap: 6px;
       }
 
       /* 顶部刻度（只渲染一行） */
