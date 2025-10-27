@@ -602,9 +602,9 @@
         // ---- 在标题右侧显示 office.note ----
         const noteEl = document.getElementById("oh-note");
         if (noteEl && js.office && js.office.note) {
-          noteEl.textContent = js.office.note;
+          noteEl.textContent = `· ${js.office.note}`;
         } else if (noteEl) {
-          noteEl.textContent = ""; // 没有就清空
+          noteEl.textContent = "";
         }
 
         if (Array.isArray(js.schedule)) {
