@@ -258,15 +258,6 @@
           Helvetica, Arial;
       }
 
-      /* Office Hours 标题右侧小注 */
-      #oh-note {
-        font: 600 32px/1.2 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-        opacity: 0.55;
-        margin-left: 24px;
-        vertical-align: middle;
-      }
-
       /* 左下周时间轴整体 */
       .oh {
         display: grid;
@@ -383,19 +374,6 @@
       .oh-tick {
         display: none !important;
       }
-
-      /* 把左侧三个元素都固定在 .bottom 的第 1 列 */
-      .oh-title,
-      .oh-scale,
-      #oh-week {
-        grid-column: 1 / 2;
-      }
-
-      /* 右侧 QR 的 panel 固定在第 2 列，并从第 1 行开始占满需要的行 */
-      .bottom > .panel:last-child {
-        grid-column: 2 / 3;
-        grid-row: 1 / span 3; /* 行数可按需要调整 */
-      }
     </style>
   </head>
   <body>
@@ -420,15 +398,14 @@
       <section class="bottom">
         <!-- Left: Office Hours -->
         <!-- 左下：Office Hours 可视化（周时间轴） -->
-        <h2 class="h oh-title">
-          Office Hours
-          <span id="oh-note" class="muted"></span>
-        </h2>
-        <div class="oh-scale">
-          <div></div>
-          <div class="oh-scale-bar" id="oh-scale-bar"></div>
+        <div class="panel">
+          <h2 class="h oh-title">Office Hours</h2>
+          <div class="oh-scale">
+            <div></div>
+            <div class="oh-scale-bar" id="oh-scale-bar"></div>
+          </div>
+          <div id="oh-week" class="oh"></div>
         </div>
-        <div id="oh-week" class="oh"></div>
 
         <!-- Right: CTA + QR -->
         <div class="panel">
@@ -611,14 +588,6 @@
                 .replace(/.*(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})\s*/, "")
                 .trim()
             : "";
-
-        // ---- 在标题右侧显示 office.note ----
-        const noteEl = document.getElementById("oh-note");
-        if (noteEl && js.office && js.office.note) {
-          noteEl.textContent = `· ${js.office.note}`;
-        } else if (noteEl) {
-          noteEl.textContent = "";
-        }
 
         if (Array.isArray(js.schedule)) {
           renderOfficeHours(js.schedule, {
