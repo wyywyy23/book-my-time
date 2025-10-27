@@ -383,6 +383,19 @@
       .oh-tick {
         display: none !important;
       }
+
+      /* 把左侧三个元素都固定在 .bottom 的第 1 列 */
+      .oh-title,
+      .oh-scale,
+      #oh-week {
+        grid-column: 1 / 2;
+      }
+
+      /* 右侧 QR 的 panel 固定在第 2 列，并从第 1 行开始占满需要的行 */
+      .bottom > .panel:last-child {
+        grid-column: 2 / 3;
+        grid-row: 1 / span 3; /* 行数可按需要调整 */
+      }
     </style>
   </head>
   <body>
