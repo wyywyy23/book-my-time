@@ -252,6 +252,10 @@
         display: grid;
         gap: 12px;
       }
+      .oh-title {
+        font: 800 48px/1.2 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial;
+      }
       .oh-row {
         display: grid;
         grid-template-columns: 88px 1fr;
@@ -270,13 +274,24 @@
         border: 3px solid var(--line);
         border-radius: 14px;
         background: #fff;
-        overflow: hidden;
+        overflow: visible;
+        padding-top: 0;
       }
       .oh-slot {
         position: absolute;
         top: 0;
         bottom: 0;
         background: #000;
+      }
+      .oh-slot-label {
+        position: absolute;
+        top: -30px;
+        transform: translateX(-50%);
+        font: 600 28px/1 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial;
+        white-space: nowrap;
+        background: transparent;
+        color: #000;
       }
       /* 刻度（淡）— 仅作对齐参考，e-ink 下保持低对比 */
       .oh-bar::before,
@@ -295,6 +310,22 @@
       .oh-bar::after {
         right: 0;
       } /* 17:00 */
+      .oh-tick {
+        position: absolute;
+        top: 26px;
+        font: 600 24px/1 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial;
+        opacity: 0.6;
+      }
+      .oh-tick.l {
+        left: 0;
+        transform: translateX(-6px);
+      }
+      .oh-tick.r {
+        right: 0;
+        transform: translateX(6px);
+        text-align: right;
+      }
     </style>
   </head>
   <body>
@@ -320,11 +351,8 @@
         <!-- Left: Office Hours -->
         <!-- 左下：Office Hours 可视化（周时间轴） -->
         <div class="panel">
-          <h2 class="h">Office Hours</h2>
+          <h2 class="h oh-title">Office Hours</h2>
           <div id="oh-week" class="oh"></div>
-          <p class="script" style="margin-top: 10px; opacity: 0.6">
-            Mon--Fri · scale 09:00--17:00
-          </p>
         </div>
 
         <!-- Right: CTA + QR -->
@@ -501,25 +529,24 @@
         console.log("[status] parsed:", { raw, k });
         setStatus(k || "busy", sub);
 
-        // ---- Office Hours 可视化 ----
-        // 1) 优先读取结构化 schedule
-        //    JSON 结构示例（推荐）：
-        //    "schedule": [
-        //      {"day":"Mon","ranges":[["14:00","16:00"]]},
-        //      {"day":"Tue","ranges":[["10:00","11:00"],["14:00","15:00"]]},
-        //      ...
-        //    ]
+        // 从 office.line2 里尽量抽取地点作为默认地点（如果 schedule 项没有给）
+        const defaultLoc =
+          js.office && js.office.line2
+            ? String(js.office.line2)
+                .replace(/.*(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})\s*/, "")
+                .trim()
+            : "";
+
         if (Array.isArray(js.schedule)) {
           renderOfficeHours(js.schedule, {
             start: "09:00",
             end: "17:00",
             days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+            defaultLoc,
           });
         } else if (js.office_hours) {
-          // 2) 兼容原有字符串格式： "Tue/Thu 14:00-15:00 ITE 461" 或 "Mon 14:00–16:00 @ Room"
-          //   仅示例解析（简单提取 HH:MM-HH:MM），实际可按你具体格式完善
+          // 兼容旧的 office_hours 字符串：只画一天一段
           const s = String(js.office_hours);
-          // 粗略判断 Day 和时间范围，默认放到对应 Day，没有匹配就放 Mon
           const dayMap = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
           const foundDay = dayMap.find((d) =>
             s.toLowerCase().includes(d.toLowerCase())
@@ -531,19 +558,9 @@
             start: "09:00",
             end: "17:00",
             days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-          });
-        } else if (js.office && (js.office.line1 || js.office.line2)) {
-          // 3) 简单从 office.line2 提取一段时间（可根据你的真实格式再增强）
-          const s = String(js.office.line2 || "");
-          const m = s.match(/(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})/);
-          const ranges = m ? [[m[1], m[2]]] : [];
-          renderOfficeHours([{ day: "Mon", ranges }], {
-            start: "09:00",
-            end: "17:00",
-            days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+            defaultLoc,
           });
         } else {
-          // 没有任何可解析信息：显示空轨道
           renderOfficeHours([], {
             start: "09:00",
             end: "17:00",
@@ -562,34 +579,35 @@
           document.getElementById("qr-script").textContent = js.qr_script;
       }
 
-      // ---- Office Hours: 周时间轴渲染 ----
-
       // 将 "HH:MM" 转为分钟
       function t2m(s) {
         const [h, m] = s.split(":").map(Number);
         return h * 60 + (m || 0);
       }
 
-      // 渲染周时间轴
-      // opts = { start:"09:00", end:"17:00", days:["Mon","Tue","Wed","Thu","Fri"] }
+      // 渲染周时间轴：schedule 支持
+      // [{ day:"Mon", ranges:[ ["14:00","16:00","ITE 461"], ["10:00","11:00"] ] }, ...]
+      // 若某段未提供地点，将回退到 opts.defaultLoc
       function renderOfficeHours(schedule, opts) {
         const root = document.getElementById("oh-week");
         if (!root) return;
-        root.innerHTML = ""; // 清空
+        root.innerHTML = "";
 
         const cfg = Object.assign(
           {
             start: "09:00",
             end: "17:00",
             days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+            defaultLoc: "",
           },
           opts || {}
         );
+
         const minM = t2m(cfg.start),
           maxM = t2m(cfg.end),
           span = Math.max(1, maxM - minM);
 
-        // 将 schedule 归一化为 {Mon:[["14:00","16:00"],...], ...}
+        // 归一化 map: { Mon:[[s,e,loc],...], ... }
         const map = {};
         (cfg.days || []).forEach((d) => (map[d] = []));
         if (Array.isArray(schedule)) {
@@ -597,12 +615,16 @@
             const d = (item.day || item.D || "").slice(0, 3);
             if (!map[d]) map[d] = [];
             (item.ranges || item.slots || []).forEach((r) => {
-              if (Array.isArray(r) && r.length >= 2) map[d].push([r[0], r[1]]);
+              if (Array.isArray(r) && r.length >= 2) {
+                const loc =
+                  (r[2] && String(r[2]).trim()) || cfg.defaultLoc || "";
+                map[d].push([r[0], r[1], loc]);
+              }
             });
           });
         }
 
-        // 生成行
+        // 生成每一行
         (cfg.days || Object.keys(map)).forEach((day) => {
           const row = document.createElement("div");
           row.className = "oh-row";
@@ -613,17 +635,39 @@
           const bar = document.createElement("div");
           bar.className = "oh-bar";
 
-          (map[day] || []).forEach(([s, e]) => {
+          // 左右端刻度（09:00 / 17:00）
+          const tl = document.createElement("div");
+          tl.className = "oh-tick l";
+          tl.textContent = cfg.start;
+          const tr = document.createElement("div");
+          tr.className = "oh-tick r";
+          tr.textContent = cfg.end;
+          bar.appendChild(tl);
+          bar.appendChild(tr);
+
+          // 时段
+          (map[day] || []).forEach(([s, e, loc], idx) => {
             const sm = Math.max(minM, t2m(s)),
               em = Math.min(maxM, t2m(e));
             if (em <= sm) return;
-            const slot = document.createElement("div");
             const left = ((sm - minM) / span) * 100;
             const width = ((em - sm) / span) * 100;
+
+            const slot = document.createElement("div");
             slot.className = "oh-slot";
             slot.style.left = left + "%";
             slot.style.width = width + "%";
             bar.appendChild(slot);
+
+            // 标签（时间 + 地点）：置于段的中点上方
+            const label = document.createElement("div");
+            label.className = "oh-slot-label";
+            const timeText = `${s}–${e}`;
+            label.textContent = loc ? `${timeText} · ${loc}` : timeText;
+            label.style.left = left + width / 2 + "%";
+            // 多段时轻微上移避免重叠（最多叠两层）
+            label.style.top = -30 - (idx % 2) * 18 + "px";
+            bar.appendChild(label);
           });
 
           row.appendChild(lab);
