@@ -268,19 +268,19 @@
       .oh-scale {
         position: relative;
         height: 30px;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
       }
       .oh-scale .tick {
         position: absolute;
         top: 0;
         width: 2px;
-        height: 22px;
+        height: 18px;
         background: #000;
         opacity: 0.35;
       }
       .oh-scale .tick-label {
         position: absolute;
-        top: 22px;
+        top: 18px;
         transform: translateX(-50%);
         font: 600 24px/1 JetBrains Mono, ui-monospace, SFMono-Regular, Menlo,
           Consolas, "Liberation Mono", monospace;
@@ -661,11 +661,11 @@
         const scaleBar = document.getElementById("oh-scale-bar");
         if (scaleBar) {
           scaleBar.innerHTML = "";
-          const step = 120; // 2h
+          const step = 60; // 1h
           const first = Math.ceil(minM / step) * step;
           for (let m = first; m <= maxM; m += step) {
             const pct = ((m - minM) / span) * 100;
-            const hour = Math.floor(m / 60); // 9 / 11 / 13 / ...
+            const hour = Math.floor(m / 60); // 9 / 10 / 11 / ...
             const lab = document.createElement("div");
             lab.className = "tick-label";
             lab.style.left = pct + "%";
