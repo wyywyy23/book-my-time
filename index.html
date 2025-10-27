@@ -291,7 +291,7 @@
       .oh-row {
         display: grid;
         grid-template-columns: 110px 1fr;
-        gap: 12px;
+        gap: 10px;
         align-items: center;
       }
 
@@ -302,6 +302,35 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
         text-align: right;
+      }
+
+      /* 顶部刻度：用与 .oh-row 相同的两列网格，让刻度与 bar 对齐 */
+      .oh-scale {
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        align-items: end;
+        height: 34px;
+        margin-bottom: 4px;
+      }
+      .oh-scale-bar {
+        position: relative;
+        height: 26px;
+      }
+      .oh-scale-bar .tick {
+        position: absolute;
+        bottom: 10px;
+        width: 2px;
+        height: 16px;
+        background: #000;
+        opacity: 0.35;
+      }
+      .oh-scale-bar .tick-label {
+        position: absolute;
+        bottom: 0;
+        transform: translateX(-50%);
+        font: 600 20px/1 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial; /* 更小 */
+        opacity: 0.75;
       }
 
       /* 条：去圆角空心，改为浅灰底，黑色区段叠加 */
@@ -337,38 +366,43 @@
         text-align: right;
       }
 
-      /* 刻度（淡）— 仅作对齐参考，e-ink 下保持低对比 */
-      .oh-bar::before,
-      .oh-bar::after {
-        content: "";
+      /* 条：灰底，无黑边框；黑色实心段叠加 */
+      .oh-bar {
+        position: relative;
+        height: 34px;
+        background: #e9e9e9; /* 灰底 */
+        border: none;
+        outline: none;
+        overflow: visible;
+      }
+      .oh-slot {
         position: absolute;
         top: 0;
         bottom: 0;
-        width: 2px;
         background: #000;
-        opacity: 0.18;
       }
-      .oh-bar::before {
-        left: 0;
-      } /* 09:00 */
-      .oh-bar::after {
-        right: 0;
-      } /* 17:00 */
-      .oh-tick {
+
+      /* 标签：默认放黑段右侧；越界自动放左侧；用 Inter 且更小 */
+      .oh-slot-label {
         position: absolute;
-        top: 26px;
-        font: 600 24px/1 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-        opacity: 0.6;
+        top: 50%;
+        transform: translate(8px, -50%);
+        font: 600 22px/1 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial; /* 更小 */
+        white-space: nowrap;
+        color: #000;
+        pointer-events: none;
       }
-      .oh-tick.l {
-        left: 0;
-        transform: translateX(-6px);
-      }
-      .oh-tick.r {
-        right: 0;
-        transform: translateX(6px);
+      .oh-slot-label.left {
+        transform: translate(-8px, -50%) translateX(-100%);
         text-align: right;
+      }
+
+      /* 旧的每条左右端刻度 & bar 内置 ::before/::after 刻度（不用了） */
+      .oh-bar::before,
+      .oh-bar::after,
+      .oh-tick {
+        display: none !important;
       }
     </style>
   </head>
@@ -396,6 +430,10 @@
         <!-- 左下：Office Hours 可视化（周时间轴） -->
         <div class="panel">
           <h2 class="h oh-title">Office Hours</h2>
+          <div class="oh-scale">
+            <div></div>
+            <div class="oh-scale-bar" id="oh-scale-bar"></div>
+          </div>
           <div id="oh-week" class="oh"></div>
         </div>
 
@@ -644,33 +682,35 @@
           },
           opts || {}
         );
-
         const minM = t2m(cfg.start),
           maxM = t2m(cfg.end),
           span = Math.max(1, maxM - minM);
 
-        // —— 顶部刻度行（只渲染一次）——
-        const scale = document.createElement("div");
-        scale.className = "oh-scale";
-        // 每两小时一个刻度：09,11,13,15,17（根据 cfg.start/end 自动算）
-        const first = Math.ceil(minM / 120) * 120; // 向上取整到 2h 倍数
-        for (let m = first; m <= maxM; m += 120) {
-          const pct = ((m - minM) / span) * 100;
-          const tH = String(Math.floor(m / 60)).padStart(2, "0");
-          const tM = String(m % 60).padStart(2, "0");
-          const tick = document.createElement("div");
-          tick.className = "tick";
-          tick.style.left = pct + "%";
-          const lab = document.createElement("div");
-          lab.className = "tick-label";
-          lab.style.left = pct + "%";
-          lab.textContent = `${tH}:${tM}`;
-          scale.appendChild(tick);
-          scale.appendChild(lab);
+        /* ------- 顶部刻度（与 bar 对齐） ------- */
+        const scaleBar = document.getElementById("oh-scale-bar");
+        if (scaleBar) {
+          scaleBar.innerHTML = "";
+          // 固定 2 小时间隔，从 09:00 开到 17:00（根据 cfg.start/end 自动算）
+          const step = 120; // 分钟
+          const first = Math.ceil(minM / step) * step;
+          for (let m = first; m <= maxM; m += step) {
+            const pct = ((m - minM) / span) * 100;
+            const tH = String(Math.floor(m / 60)).padStart(2, "0");
+            const tM = String(m % 60).padStart(2, "0");
+            const tick = document.createElement("div");
+            tick.className = "tick";
+            tick.style.left = pct + "%";
+            const lab = document.createElement("div");
+            lab.className = "tick-label";
+            lab.style.left = pct + "%";
+            lab.textContent = `${tH}:${tM}`;
+            scaleBar.appendChild(tick);
+            scaleBar.appendChild(lab);
+          }
         }
-        root.appendChild(scale);
+        /* ------------------------------------- */
 
-        // 归一化 map: { MON:[[s,e,loc],...], ... }
+        // 归一化 map & 绘制各行（保持你现有逻辑）
         const map = {};
         (cfg.days || []).forEach((d) => (map[d.toUpperCase()] = []));
         if (Array.isArray(schedule)) {
@@ -687,7 +727,6 @@
           });
         }
 
-        // 每一天一行
         (cfg.days || Object.keys(map)).forEach((dayRaw) => {
           const day = dayRaw.toUpperCase();
           const row = document.createElement("div");
@@ -699,12 +738,10 @@
           const bar = document.createElement("div");
           bar.className = "oh-bar";
 
-          // 实心黑段 + 标签
           (map[day] || []).forEach(([s, e, loc]) => {
             const sm = Math.max(minM, t2m(s)),
               em = Math.min(maxM, t2m(e));
             if (em <= sm) return;
-
             const leftPct = ((sm - minM) / span) * 100;
             const widthPct = ((em - sm) / span) * 100;
 
@@ -714,20 +751,18 @@
             slot.style.width = widthPct + "%";
             bar.appendChild(slot);
 
-            // 标签默认放右侧；若越界就放左侧
+            // 标签：默认黑段右侧，越界则左侧
             const label = document.createElement("div");
             label.className = "oh-slot-label";
             const timeText = `${s}–${e}`;
             label.textContent = loc ? `${timeText} · ${loc}` : timeText;
-            label.style.left = leftPct + widthPct + "%"; // 右侧
+            label.style.left = leftPct + widthPct + "%";
             bar.appendChild(label);
 
-            // 越界检测并纠正
-            // 需要先插入 DOM 再测量
+            // 越界检测
             const barRect = bar.getBoundingClientRect();
             const labRect = label.getBoundingClientRect();
             if (labRect.right > barRect.right - 4) {
-              // 放不下 -> 放左边
               label.classList.add("left");
               label.style.left = leftPct + "%";
             }
