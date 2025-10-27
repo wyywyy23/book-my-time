@@ -258,6 +258,15 @@
           Helvetica, Arial;
       }
 
+      /* Office Hours 标题右侧小注 */
+      #oh-note {
+        font: 600 32px/1.2 Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial;
+        opacity: 0.55;
+        margin-left: 24px;
+        vertical-align: middle;
+      }
+
       /* 左下周时间轴整体 */
       .oh {
         display: grid;
@@ -398,14 +407,15 @@
       <section class="bottom">
         <!-- Left: Office Hours -->
         <!-- 左下：Office Hours 可视化（周时间轴） -->
-        <div class="panel">
-          <h2 class="h oh-title">Office Hours</h2>
-          <div class="oh-scale">
-            <div></div>
-            <div class="oh-scale-bar" id="oh-scale-bar"></div>
-          </div>
-          <div id="oh-week" class="oh"></div>
+        <h2 class="h oh-title">
+          Office Hours
+          <span id="oh-note" class="muted"></span>
+        </h2>
+        <div class="oh-scale">
+          <div></div>
+          <div class="oh-scale-bar" id="oh-scale-bar"></div>
         </div>
+        <div id="oh-week" class="oh"></div>
 
         <!-- Right: CTA + QR -->
         <div class="panel">
@@ -588,6 +598,14 @@
                 .replace(/.*(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})\s*/, "")
                 .trim()
             : "";
+
+        // ---- 在标题右侧显示 office.note ----
+        const noteEl = document.getElementById("oh-note");
+        if (noteEl && js.office && js.office.note) {
+          noteEl.textContent = js.office.note;
+        } else if (noteEl) {
+          noteEl.textContent = ""; // 没有就清空
+        }
 
         if (Array.isArray(js.schedule)) {
           renderOfficeHours(js.schedule, {
