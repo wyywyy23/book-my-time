@@ -1,220 +1,250 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Office Status</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+
 <style>
-  :root {
-    --w: 1872;
-    --h: 1404;
-    --ink: #0b0b0b;
-    --muted: #565656;
-    --soft: #777;
-    --card: rgba(255, 255, 255, 0.68);
-    --card-border: rgba(0, 0, 0, 0.10);
-    --shadow: rgba(0, 0, 0, 0.10);
-  }
+:root {
+  --w: 1872;
+  --h: 1404;
+  --ink: #090909;
+  --muted: #555;
+  --soft: #777;
+  --card: rgba(255,255,255,0.70);
+  --card-line: rgba(0,0,0,0.10);
+  --shadow: rgba(0,0,0,0.10);
+}
 
-  html, body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    color: var(--ink);
-    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  }
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+}
 
-  body {
-    display: grid;
-    place-items: start;
-  }
+body {
+  display: grid;
+  place-items: start;
+}
 
-  .stage {
-    width: calc(var(--w) * 1px);
-    height: calc(var(--h) * 1px);
-    position: relative;
-    overflow: hidden;
-  }
+.stage {
+  width: calc(var(--w) * 1px);
+  height: calc(var(--h) * 1px);
+  position: relative;
+  overflow: hidden;
+}
 
-  .scale {
-    transform-origin: top left;
-    transform: scale(calc(100vw / (var(--w) * 1px)));
-  }
+.scale {
+  transform-origin: top left;
+  transform: scale(calc(100vw / (var(--w) * 1px)));
+}
 
-  .layout {
-    width: 100%;
-    height: 100%;
-    display: grid;
-    grid-template-columns: 1fr 430px;
-  }
+.bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1);
+  opacity: 0.78;
+  z-index: 0;
+}
 
-  .theme-img {
-    position: absolute;
-    left: -20px;
-    bottom: -10px;
-    width: 1320px;
-    height: 760px;
-    object-fit: cover;
-    opacity: 0.58;
-    filter: grayscale(1);
-    z-index: 0;
-  }
-
-  .theme-fade {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 1320px;
-    height: 920px;
-    background: linear-gradient(
-      to bottom,
-      rgba(255,255,255,1) 0%,
-      rgba(255,255,255,0.82) 36%,
-      rgba(255,255,255,0.35) 64%,
-      rgba(255,255,255,0.04) 100%
+.bg-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,0.12) 0%,
+      rgba(255,255,255,0.30) 45%,
+      rgba(255,255,255,0.55) 72%,
+      rgba(255,255,255,0.72) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.72) 0%,
+      rgba(255,255,255,0.18) 50%,
+      rgba(255,255,255,0.10) 100%
     );
-    z-index: 1;
-    pointer-events: none;
-  }
+}
 
-  .hero {
-    position: relative;
-    z-index: 2;
-    padding: 440px 90px 90px 108px;
-  }
+.abstract-meeting-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 1;
+  background:
+    radial-gradient(circle at 20% 72%, rgba(0,0,0,0.12) 0 2px, transparent 3px) 0 0 / 18px 18px,
+    radial-gradient(circle at 30% 70%, transparent 0 78px, rgba(0,0,0,0.08) 79px 82px, transparent 83px),
+    radial-gradient(circle at 43% 58%, transparent 0 125px, rgba(0,0,0,0.07) 126px 130px, transparent 131px),
+    radial-gradient(circle at 58% 78%, transparent 0 155px, rgba(0,0,0,0.06) 156px 160px, transparent 161px),
+    radial-gradient(circle at 75% 36%, transparent 0 95px, rgba(0,0,0,0.05) 96px 99px, transparent 100px),
+    #f7f7f7;
+}
 
-  .status {
-    font-size: 176px;
-    line-height: 0.88;
-    font-weight: 880;
-    letter-spacing: -0.075em;
-    text-transform: uppercase;
-    margin: 0 0 34px;
-  }
+.layout {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 470px;
+}
 
-  .sub {
-    max-width: 720px;
-    font-size: 42px;
-    line-height: 1.22;
-    font-weight: 580;
-    color: var(--muted);
-    margin: 0;
-  }
+.hero {
+  position: relative;
+  padding: 440px 90px 90px 108px;
+}
 
-  .identity {
-    position: absolute;
-    left: 110px;
-    bottom: 86px;
-    z-index: 3;
-    font-size: 25px;
-    line-height: 1.32;
-    font-weight: 650;
-    color: rgba(0,0,0,0.66);
-    letter-spacing: -0.01em;
-  }
+.status {
+  font-size: 172px;
+  line-height: 0.88;
+  font-weight: 900;
+  letter-spacing: -0.078em;
+  text-transform: uppercase;
+  margin: 0 0 34px;
+  max-width: 1050px;
+}
 
-  .identity strong {
-    display: block;
-    font-size: 30px;
-    color: rgba(0,0,0,0.82);
-    margin-bottom: 4px;
-  }
+.sub {
+  max-width: 760px;
+  font-size: 42px;
+  line-height: 1.22;
+  font-weight: 620;
+  color: var(--muted);
+  margin: 0;
+}
 
-  .side {
-    position: relative;
-    z-index: 4;
-    padding: 78px 56px 78px 0;
-    display: grid;
-    grid-template-rows: 0.82fr 1.38fr 1fr;
-    gap: 34px;
-  }
+.identity {
+  position: absolute;
+  left: 110px;
+  bottom: 76px;
+  z-index: 3;
+  font-size: 25px;
+  line-height: 1.32;
+  font-weight: 650;
+  color: rgba(0,0,0,0.62);
+}
 
-  .card {
-    background: var(--card);
-    border: 2px solid var(--card-border);
-    border-radius: 34px;
-    box-shadow: 0 18px 55px var(--shadow);
-    padding: 38px 38px;
-    overflow: hidden;
-  }
+.identity strong {
+  display: block;
+  font-size: 30px;
+  color: rgba(0,0,0,0.82);
+  margin-bottom: 4px;
+}
 
-  .card-title {
-    font-size: 27px;
-    font-weight: 860;
-    letter-spacing: 0.11em;
-    text-transform: uppercase;
-    margin: 0 0 22px;
-  }
+.side {
+  padding: 78px 56px 78px 0;
+  display: grid;
+  grid-template-rows: 0.75fr 1.45fr 1fr;
+  gap: 34px;
+}
 
-  .office-main {
-    font-size: 43px;
-    line-height: 1.08;
-    font-weight: 780;
-    letter-spacing: -0.035em;
-    margin: 0;
-  }
+.card {
+  background: var(--card);
+  border: 2px solid var(--card-line);
+  border-radius: 34px;
+  box-shadow: 0 18px 55px var(--shadow);
+  padding: 38px;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+}
 
-  .office-note {
-    margin-top: 18px;
-    font-size: 26px;
-    line-height: 1.25;
-    font-weight: 600;
-    color: var(--muted);
-  }
+.card-title {
+  font-size: 27px;
+  font-weight: 860;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  margin: 0 0 22px;
+}
 
-  .qr-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding-top: 42px;
-    padding-bottom: 42px;
-  }
+.office-main {
+  font-size: 42px;
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  margin: 0;
+}
 
-  .qr-img {
-    width: 255px;
-    height: 255px;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-    margin: 10px 0 26px;
-  }
+.office-note {
+  margin-top: 18px;
+  font-size: 25px;
+  line-height: 1.26;
+  font-weight: 620;
+  color: var(--muted);
+}
 
-  .qr-copy {
-    font-size: 34px;
-    line-height: 1.12;
-    font-weight: 780;
-    letter-spacing: -0.035em;
-  }
+.qr-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-top: 42px;
+  padding-bottom: 42px;
+}
 
-  .qr-sub {
-    margin-top: 10px;
-    font-size: 24px;
-    line-height: 1.25;
-    color: var(--muted);
-    font-weight: 600;
-  }
+.qr-img {
+  width: 255px;
+  height: 255px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  margin: 8px 0 26px;
+  background: #fff;
+}
 
-  .today-main {
-    font-size: 31px;
-    line-height: 1.25;
-    font-weight: 740;
-    margin: 0 0 22px;
-    letter-spacing: -0.025em;
-  }
+.qr-copy {
+  font-size: 34px;
+  line-height: 1.12;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
 
-  .today-meta {
-    display: grid;
-    gap: 12px;
-    font-size: 25px;
-    line-height: 1.25;
-    font-weight: 620;
-    color: var(--muted);
-  }
+.qr-sub {
+  margin-top: 10px;
+  font-size: 24px;
+  line-height: 1.25;
+  color: var(--muted);
+  font-weight: 620;
+}
 
-  .today-meta span {
-    color: var(--ink);
-    font-weight: 760;
-  }
+.today-main {
+  font-size: 30px;
+  line-height: 1.24;
+  font-weight: 760;
+  margin: 0 0 22px;
+  letter-spacing: -0.025em;
+}
+
+.today-meta {
+  display: grid;
+  gap: 12px;
+  font-size: 25px;
+  line-height: 1.25;
+  font-weight: 620;
+  color: var(--muted);
+}
+
+.today-meta span {
+  color: var(--ink);
+  font-weight: 780;
+}
 </style>
+</head>
 
+<body>
 <div class="stage scale">
-  <img class="theme-img" src="status-theme-placeholder.png" />
-  <div class="theme-fade"></div>
+  <img class="bg" id="theme-bg" src="status-theme-in.png" />
+  <div class="abstract-meeting-bg" id="meeting-bg" hidden></div>
+  <div class="bg-fade"></div>
 
   <main class="layout">
     <section class="hero">
@@ -225,15 +255,15 @@
     <aside class="side">
       <section class="card">
         <h2 class="card-title">Office Hours</h2>
-        <p class="office-main" id="office-main">Mon–Fri<br />9:00–17:00</p>
-        <div class="office-note" id="office-note">By appointment when needed</div>
+        <p class="office-main" id="office-main">Tue / Thu<br />14:00–15:00</p>
+        <div class="office-note" id="office-note">ITE 461</div>
       </section>
 
       <section class="card qr-card">
         <h2 class="card-title">Book a Time</h2>
         <img class="qr-img" id="qr" alt="Booking QR" />
-        <div class="qr-copy">Schedule a meeting</div>
-        <div class="qr-sub">Scan to open booking page</div>
+        <div class="qr-copy" id="cta-text">Schedule a meeting</div>
+        <div class="qr-sub" id="qr-note">Scan to open booking page</div>
       </section>
 
       <section class="card">
@@ -242,8 +272,8 @@
           Thinking about photonic chiplet interconnects.
         </p>
         <div class="today-meta">
-          <div>Pollen: <span id="pollen">High</span></div>
-          <div>AQI: <span id="aqi">Good</span></div>
+          <div>Updated: <span id="updated-at">—</span></div>
+          <div>Location: <span id="location">ITE 461</span></div>
         </div>
       </section>
     </aside>
@@ -255,3 +285,217 @@
     </div>
   </main>
 </div>
+
+<script>
+const DEFAULT_BOOKING_URL =
+  "https://app.reclaim.ai/m/yuyang-wang/quick-meeting";
+
+const GIST_ID = "f96b0e927c21a42d247b626dceae243e";
+const GIST_FILE = "status.json";
+const STATUS_SOURCE = `https://api.github.com/gists/${GIST_ID}`;
+
+const STATUS_MAP = {
+  "in": {
+    title: "IN OFFICE",
+    sub: "Available today.",
+    img: "status-theme-in.png"
+  },
+  "in-office": {
+    title: "IN OFFICE",
+    sub: "Available today.",
+    img: "status-theme-in.png"
+  },
+  "office": {
+    title: "IN OFFICE",
+    sub: "Available today.",
+    img: "status-theme-in.png"
+  },
+  "meeting": {
+    title: "IN MEETING",
+    sub: "Currently in a meeting.",
+    img: "status-theme-meeting.png",
+    abstract: true
+  },
+  "in-meeting": {
+    title: "IN MEETING",
+    sub: "Currently in a meeting.",
+    img: "status-theme-meeting.png",
+    abstract: true
+  },
+  "ooo": {
+    title: "OUT OF OFFICE",
+    sub: "Away from office.",
+    img: "status-theme-out.png"
+  },
+  "out": {
+    title: "OUT OF OFFICE",
+    sub: "Away from office.",
+    img: "status-theme-out.png"
+  },
+  "out-of-office": {
+    title: "OUT OF OFFICE",
+    sub: "Away from office.",
+    img: "status-theme-out.png"
+  }
+};
+
+function stripJsonComments(input) {
+  let out = "", inStr = false, esc = false, inBlk = false, inLine = false, quote = "";
+  for (let i = 0; i < input.length; i++) {
+    const c = input[i], n = input[i + 1];
+    if (inLine) { if (c === "\n") { inLine = false; out += c; } continue; }
+    if (inBlk) { if (c === "*" && n === "/") { inBlk = false; i++; } continue; }
+    if (inStr) {
+      out += c;
+      if (esc) { esc = false; continue; }
+      if (c === "\\") { esc = true; continue; }
+      if (c === quote) inStr = false;
+      continue;
+    }
+    if (c === "/" && n === "/") { inLine = true; i++; continue; }
+    if (c === "/" && n === "*") { inBlk = true; i++; continue; }
+    if (c === '"' || c === "'") { inStr = true; quote = c; out += c; continue; }
+    out += c;
+  }
+  return out;
+}
+
+function setTheme(statusKey) {
+  const key = String(statusKey || "in").trim().toLowerCase();
+  const s = STATUS_MAP[key] || STATUS_MAP["in"];
+
+  document.getElementById("status-text").textContent = s.title;
+  document.getElementById("status-sub").textContent = s.sub;
+
+  const bg = document.getElementById("theme-bg");
+  const meetingBg = document.getElementById("meeting-bg");
+
+  if (s.abstract) {
+    bg.hidden = true;
+    meetingBg.hidden = false;
+    bg.src = s.img;
+    bg.onload = () => {
+      bg.hidden = false;
+      meetingBg.hidden = true;
+    };
+    bg.onerror = () => {
+      bg.hidden = true;
+      meetingBg.hidden = false;
+    };
+  } else {
+    meetingBg.hidden = true;
+    bg.hidden = false;
+    bg.src = s.img;
+  }
+}
+
+function setQR(url) {
+  const u = url || DEFAULT_BOOKING_URL;
+  const qr = document.getElementById("qr");
+  const svgUrl = `https://api.qrserver.com/v1/create-qr-code/?format=svg&size=420x420&data=${encodeURIComponent(u)}&color=000000&bgcolor=FFFFFF`;
+  const pngUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&data=${encodeURIComponent(u)}&color=000000&bgcolor=FFFFFF`;
+  qr.src = svgUrl;
+  qr.onerror = () => {
+    qr.onerror = null;
+    qr.src = pngUrl;
+  };
+}
+
+function formatUpdatedAt(s) {
+  if (!s) return "—";
+  const d = new Date(s);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function setOffice(js) {
+  const officeMain = document.getElementById("office-main");
+  const officeNote = document.getElementById("office-note");
+  const location = document.getElementById("location");
+
+  let main = "By appointment";
+  let note = "";
+  let loc = "";
+
+  if (js.office_hours) {
+    main = String(js.office_hours)
+      .replace(/\s+/g, " ")
+      .replace("Tue/Thu", "Tue / Thu")
+      .replace("14:00-15:00", "14:00–15:00");
+  }
+
+  if (js.office) {
+    if (js.office.line1) main = js.office.line1;
+    if (js.office.line2) loc = js.office.line2;
+    if (js.office.note) note = js.office.note;
+  }
+
+  officeMain.innerHTML = main
+    .replace(" ITE ", "<br />ITE ")
+    .replace(" 14:00", "<br />14:00");
+
+  officeNote.textContent = note || loc || "By appointment when needed";
+  location.textContent = loc || "ITE 461";
+}
+
+function applyFromJson(js) {
+  setTheme(js.status || "in");
+  setOffice(js);
+  setQR(js.booking_url || DEFAULT_BOOKING_URL);
+
+  if (js.cta) {
+    document.getElementById("cta-text").innerHTML =
+      String(js.cta).replace(/<br\s*\/?>/gi, " ");
+  }
+
+  if (js.qr_note) {
+    document.getElementById("qr-note").textContent = js.qr_note;
+  }
+
+  document.getElementById("updated-at").textContent =
+    formatUpdatedAt(js.updated_at);
+
+  if (js.today_note) {
+    document.getElementById("today-main").textContent = js.today_note;
+  }
+}
+
+async function load() {
+  setTheme("in");
+  setQR(DEFAULT_BOOKING_URL);
+
+  try {
+    const url = new URL(STATUS_SOURCE);
+    url.searchParams.set("_ts", Date.now());
+
+    const res = await fetch(url.toString(), {
+      cache: "no-store",
+      headers: { Accept: "application/vnd.github+json" }
+    });
+
+    if (!res.ok) return;
+
+    const data = await res.json();
+    const file =
+      data.files &&
+      (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
+
+    if (!file || !file.content) return;
+
+    const clean = stripJsonComments(file.content);
+    const js = JSON.parse(clean);
+    applyFromJson(js);
+  } catch (e) {
+    console.error("Status load error:", e);
+  }
+}
+
+load();
+</script>
+</body>
+</html>
