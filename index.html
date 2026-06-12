@@ -1,432 +1,271 @@
-<!DOCTYPE html>
-<html lang="en-US">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Office Door Sign v2</title>
-  <meta name="color-scheme" content="light" />
-  <style>
-    :root {
-      --design-w: 1872;
-      --design-h: 1404;
-      --black: #050505;
-      --ink: #111;
-      --muted: #5f5f5f;
-      --soft: #8b8b8b;
-      --line: #181818;
-      --panel: #f6f6f6;
-      --card: #ffffff;
-      --wash: #eeeeee;
-    }
+<style>
+  :root {
+    --w: 1872;
+    --h: 1404;
 
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      background: #fff;
-      color: var(--ink);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+    --ink: #111;
+    --muted: #555;
+    --soft: #777;
+    --card: rgba(255, 255, 255, 0.62);
+    --card-border: rgba(0, 0, 0, 0.12);
+    --shadow: rgba(0, 0, 0, 0.10);
+  }
 
-    body {
-      display: grid;
-      place-items: start;
-      min-height: calc(100vw * (var(--design-h) / var(--design-w)));
-      overflow: hidden;
-    }
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    color: var(--ink);
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+  }
 
-    .stage {
-      width: calc(var(--design-w) * 1px);
-      height: calc(var(--design-h) * 1px);
-      transform-origin: top left;
-      transform: scale(calc(100vw / (var(--design-w) * 1px)));
-      display: grid;
-      grid-template-columns: 66.8% 33.2%;
-      background: #fff;
-      border: 4px solid var(--black);
-    }
+  body {
+    display: grid;
+    place-items: start;
+  }
 
-    .presence {
-      position: relative;
-      display: grid;
-      grid-template-rows: 55% 45%;
-      min-width: 0;
-      overflow: hidden;
-    }
+  .stage {
+    width: calc(var(--w) * 1px);
+    height: calc(var(--h) * 1px);
+    position: relative;
+    overflow: hidden;
+  }
 
-    .presence-copy {
-      padding: 92px 86px 34px 92px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      border-bottom: 4px solid var(--line);
-      background: #fff;
-    }
+  .scale {
+    transform-origin: top left;
+    transform: scale(calc(100vw / (var(--w) * 1px)));
+  }
 
-    .eyebrow {
-      font-size: 34px;
-      line-height: 1;
-      font-weight: 850;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 46px;
-    }
+  .layout {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 430px;
+  }
 
-    .status {
-      font-size: 176px;
-      line-height: 0.92;
-      font-weight: 900;
-      letter-spacing: -0.055em;
-      text-transform: uppercase;
-      max-width: 1050px;
-    }
+  .hero {
+    position: relative;
+    padding: 100px 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
 
-    .status-sub {
-      margin-top: 42px;
-      font-size: 46px;
-      line-height: 1.22;
-      font-weight: 560;
-      color: var(--muted);
-      max-width: 940px;
-    }
+  .theme-img {
+    position: absolute;
+    left: 0;
+    right: 430px;
+    bottom: 0;
+    width: calc(100% - 430px);
+    height: 48%;
+    object-fit: cover;
+    opacity: 0.68;
+    filter: grayscale(1);
+    z-index: 0;
+  }
 
-    .theme {
-      position: relative;
-      overflow: hidden;
-      background: #eee;
-    }
+  .theme-fade {
+    position: absolute;
+    left: 0;
+    right: 430px;
+    bottom: 0;
+    height: 62%;
+    background: linear-gradient(
+      to bottom,
+      rgba(255,255,255,1) 0%,
+      rgba(255,255,255,0.75) 34%,
+      rgba(255,255,255,0.15) 100%
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
 
-    .theme img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      filter: grayscale(1) contrast(1.04);
-    }
+  .status-content {
+    position: relative;
+    z-index: 2;
+    max-width: 1060px;
+  }
 
-    .theme::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,.16), rgba(255,255,255,0) 45%);
-      pointer-events: none;
-    }
+  .eyebrow {
+    font-size: 34px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 44px;
+  }
 
-    .sidebar {
-      border-left: 5px solid var(--line);
-      display: grid;
-      grid-template-rows: 28.5% 35.5% 36%;
-      background: var(--card);
-    }
+  .status {
+    font-size: 190px;
+    line-height: 0.92;
+    font-weight: 850;
+    letter-spacing: -0.065em;
+    text-transform: uppercase;
+    margin: 0 0 44px;
+  }
 
-    .block {
-      padding: 54px 54px 44px 54px;
-      display: grid;
-      align-content: center;
-      border-bottom: 4px solid var(--line);
-      min-width: 0;
-    }
-    .block:last-child { border-bottom: 0; }
+  .sub {
+    max-width: 780px;
+    font-size: 46px;
+    line-height: 1.22;
+    font-weight: 520;
+    color: var(--muted);
+    margin: 0;
+  }
 
-    .block-head {
-      display: grid;
-      grid-template-columns: 64px 1fr;
-      align-items: start;
-      gap: 30px;
-      margin-bottom: 22px;
-    }
+  .side {
+    position: relative;
+    z-index: 3;
+    padding: 70px 56px 70px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 34px;
+  }
 
-    .icon {
-      width: 64px;
-      height: 64px;
-      stroke: var(--black);
-      stroke-width: 7;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
+  .card {
+    background: var(--card);
+    border: 2px solid var(--card-border);
+    border-radius: 34px;
+    box-shadow: 0 18px 55px var(--shadow);
+    padding: 38px 38px;
+  }
 
-    .kicker {
-      font-size: 30px;
-      line-height: 1;
-      font-weight: 900;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
+  .card-title {
+    font-size: 28px;
+    font-weight: 850;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    margin: 0 0 24px;
+  }
 
-    .value {
-      font-size: 50px;
-      line-height: 1.18;
-      font-weight: 720;
-      letter-spacing: -0.025em;
-    }
+  .office-main {
+    font-size: 46px;
+    line-height: 1.18;
+    font-weight: 760;
+    margin: 0;
+  }
 
-    .note {
-      margin-top: 18px;
-      margin-left: 94px;
-      font-size: 31px;
-      line-height: 1.3;
-      font-weight: 560;
-      color: var(--muted);
-    }
+  .office-note,
+  .info-row {
+    font-size: 28px;
+    line-height: 1.3;
+    font-weight: 560;
+    color: var(--muted);
+  }
 
-    .booking {
-      grid-template-rows: auto 1fr;
-    }
+  .office-note {
+    margin-top: 16px;
+  }
 
-    .qr-row {
-      display: grid;
-      grid-template-columns: 240px 1fr;
-      align-items: center;
-      gap: 42px;
-      margin-top: 6px;
-    }
+  .qr-card {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 28px;
+    align-items: center;
+  }
 
-    .qr-img {
-      width: 240px;
-      height: 240px;
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-      background: #fff;
-      border: 0;
-    }
+  .qr-img {
+    width: 190px;
+    height: 190px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
 
-    .qr-text {
-      font-size: 38px;
-      line-height: 1.18;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
+  .qr-copy {
+    font-size: 34px;
+    line-height: 1.18;
+    font-weight: 760;
+  }
 
-    .arrow {
-      margin-top: 22px;
-      font-size: 62px;
-      line-height: 1;
-      font-weight: 800;
-    }
+  .qr-sub {
+    margin-top: 12px;
+    font-size: 25px;
+    line-height: 1.25;
+    color: var(--muted);
+    font-weight: 560;
+  }
 
-    .info-grid {
-      display: grid;
-      gap: 25px;
-      margin-top: 8px;
-    }
+  .info-list {
+    display: grid;
+    gap: 18px;
+  }
 
-    .info-row {
-      display: grid;
-      grid-template-columns: 64px 1fr auto;
-      align-items: center;
-      gap: 24px;
-      min-height: 56px;
-    }
+  .info-row {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: baseline;
+    column-gap: 18px;
+  }
 
-    .mini-icon {
-      width: 50px;
-      height: 50px;
-      stroke: var(--black);
-      stroke-width: 6;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      justify-self: center;
-    }
+  .info-icon {
+    font-size: 30px;
+    text-align: center;
+  }
 
-    .label {
-      font-size: 29px;
-      line-height: 1;
-      font-weight: 850;
-      letter-spacing: .03em;
-      text-transform: uppercase;
-    }
+  .info-label {
+    font-weight: 760;
+    color: var(--ink);
+  }
 
-    .metric {
-      font-size: 32px;
-      line-height: 1;
-      font-weight: 650;
-      text-align: right;
-      white-space: nowrap;
-    }
+  .info-value {
+    font-weight: 680;
+    color: var(--muted);
+  }
+</style>
 
-    .state-meeting .presence-copy { background: var(--black); color: #fff; }
-    .state-meeting .status-sub { color: #d7d7d7; }
-    .state-meeting .eyebrow { color: #fff; }
+<div class="stage scale">
+  <img class="theme-img" src="status-theme-placeholder.png" />
+  <div class="theme-fade"></div>
 
-    .state-office .presence-copy { background: #fff; color: var(--black); }
-    .state-away .presence-copy { background: #f2f2f2; color: var(--black); }
-    .state-away .theme img { opacity: .72; contrast: .95; }
-
-    @media screen and (max-width: 900px) {
-      body { overflow: auto; }
-    }
-  </style>
-</head>
-<body>
-  <main class="stage state-office" id="stage" aria-label="Office door sign">
-    <section class="presence" aria-label="Presence status">
-      <div class="presence-copy">
+  <main class="layout">
+    <section class="hero">
+      <div class="status-content">
         <div class="eyebrow">Status</div>
-        <div class="status" id="status-text">IN OFFICE</div>
-        <div class="status-sub" id="status-sub">Around today.</div>
+        <h1 class="status" id="status-text">IN OFFICE</h1>
+        <p class="sub" id="status-sub">I am around today.</p>
       </div>
-      <figure class="theme" aria-hidden="true">
-        <img id="theme-img" src="status-theme-placeholder.png" alt="" />
-      </figure>
     </section>
 
-    <aside class="sidebar" aria-label="Office information">
-      <section class="block office-block">
-        <div class="block-head">
-          <svg class="icon" viewBox="0 0 64 64" aria-hidden="true">
-            <circle cx="32" cy="32" r="24" />
-            <path d="M32 17v17l13 8" />
-          </svg>
-          <div>
-            <div class="kicker">Office Hours</div>
-            <div class="value" id="office-hours">Mon–Fri<br />9:00–17:00</div>
-          </div>
-        </div>
-        <div class="note" id="office-note">Usually available by appointment.</div>
+    <aside class="side">
+      <section class="card">
+        <h2 class="card-title">Office Hours</h2>
+        <p class="office-main" id="office-main">Mon–Fri<br />9:00–17:00</p>
+        <div class="office-note" id="office-note">By appointment when needed</div>
       </section>
 
-      <section class="block booking">
-        <div class="kicker">Book a Meeting</div>
-        <div class="qr-row">
-          <img class="qr-img" id="qr" alt="Meeting booking QR code" decoding="sync" />
-          <div>
-            <div class="qr-text" id="qr-note">Schedule a meeting</div>
-            <div class="arrow">→</div>
-          </div>
+      <section class="card qr-card">
+        <img class="qr-img" id="qr" alt="Booking QR" />
+        <div>
+          <div class="card-title">Book a Time</div>
+          <div class="qr-copy">Schedule a meeting</div>
+          <div class="qr-sub">Scan to open booking page</div>
         </div>
       </section>
 
-      <section class="block info-block">
-        <div class="kicker" id="info-title">Today</div>
-        <div class="info-grid" id="info-grid">
+      <section class="card">
+        <h2 class="card-title">Today</h2>
+        <div class="info-list">
           <div class="info-row">
-            <svg class="mini-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 12v40M12 32h40M18 18l28 28M46 18L18 46" /></svg>
-            <div class="label">Pollen</div><div class="metric">High</div>
+            <div class="info-icon">✣</div>
+            <div class="info-label">Pollen</div>
+            <div class="info-value" id="pollen">High</div>
           </div>
           <div class="info-row">
-            <svg class="mini-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M12 38c12 0 10-12 22-12 8 0 9 6 18 6M10 48h42M14 22h20" /></svg>
-            <div class="label">AQI</div><div class="metric">Good</div>
+            <div class="info-icon">≈</div>
+            <div class="info-label">AQI</div>
+            <div class="info-value" id="aqi">Good</div>
           </div>
           <div class="info-row">
-            <svg class="mini-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 42h28a11 11 0 0 0 0-22 17 17 0 0 0-32 7 8 8 0 0 0 4 15z" /></svg>
-            <div class="label">Weather</div><div class="metric">21°C</div>
-          </div>
-          <div class="info-row">
-            <svg class="mini-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 8a16 16 0 0 0-8 30v10h16V38A16 16 0 0 0 32 8zM25 56h14" /></svg>
-            <div class="label">Note</div><div class="metric">Step outside</div>
+            <div class="info-icon">◌</div>
+            <div class="info-label">Note</div>
+            <div class="info-value" id="today-note">Thinking in photons</div>
           </div>
         </div>
       </section>
     </aside>
   </main>
-
-  <script>
-    const DEFAULT_BOOKING_URL = "https://app.reclaim.ai/m/yuyang-wang/flexible-quick-meeting";
-    const GIST_ID = "f96b0e927c21a42d247b626dceae243e";
-    const GIST_FILE = "status.json";
-    const STATUS_SOURCE = `https://api.github.com/gists/${GIST_ID}`;
-
-    const STATUS_COPY = {
-      "in-office": { title: "IN OFFICE", sub: "Around today.", cls: "state-office" },
-      office: { title: "IN OFFICE", sub: "Around today.", cls: "state-office" },
-      in: { title: "IN OFFICE", sub: "Around today.", cls: "state-office" },
-      "in-meeting": { title: "IN MEETING", sub: "In a meeting now.", cls: "state-meeting" },
-      meeting: { title: "IN MEETING", sub: "In a meeting now.", cls: "state-meeting" },
-      "out-of-office": { title: "OUT OF OFFICE", sub: "Away from the office.", cls: "state-away" },
-      ooo: { title: "OUT OF OFFICE", sub: "Away from the office.", cls: "state-away" },
-      out: { title: "OUT OF OFFICE", sub: "Away from the office.", cls: "state-away" }
-    };
-
-    function normalizeStatus(raw) {
-      const k = String(raw || "in-office").trim().toLowerCase();
-      return STATUS_COPY[k] ? k : "in-office";
-    }
-
-    function setStatus(key, subOverride) {
-      const stage = document.getElementById("stage");
-      const k = normalizeStatus(key);
-      const m = STATUS_COPY[k];
-      stage.classList.remove("state-office", "state-meeting", "state-away");
-      stage.classList.add(m.cls);
-      document.getElementById("status-text").textContent = m.title;
-      document.getElementById("status-sub").textContent = subOverride || m.sub;
-    }
-
-    function setQR(url) {
-      const u = url || DEFAULT_BOOKING_URL;
-      const qr = document.getElementById("qr");
-      const svgUrl = `https://api.qrserver.com/v1/create-qr-code/?format=svg&size=420x420&data=${encodeURIComponent(u)}&color=000000&bgcolor=FFFFFF`;
-      const pngUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encodeURIComponent(u)}&color=000000&bgcolor=FFFFFF`;
-      qr.src = svgUrl;
-      qr.onerror = () => { qr.onerror = null; qr.src = pngUrl; };
-    }
-
-    function stripJsonComments(input) {
-      let out = "", inStr = false, esc = false, inBlk = false, inLine = false, quote = "";
-      for (let i = 0; i < input.length; i++) {
-        const c = input[i], n = input[i + 1];
-        if (inLine) { if (c === "\n") { inLine = false; out += c; } continue; }
-        if (inBlk) { if (c === "*" && n === "/") { inBlk = false; i++; } continue; }
-        if (inStr) { out += c; if (esc) { esc = false; continue; } if (c === "\\") { esc = true; continue; } if (c === quote) inStr = false; continue; }
-        if (c === "/" && n === "/") { inLine = true; i++; continue; }
-        if (c === "/" && n === "*") { inBlk = true; i++; continue; }
-        if (c === '"' || c === "'") { inStr = true; quote = c; out += c; continue; }
-        out += c;
-      }
-      return out;
-    }
-
-    function renderInfo(items) {
-      if (!Array.isArray(items) || items.length === 0) return;
-      const root = document.getElementById("info-grid");
-      root.innerHTML = "";
-      items.slice(0, 4).forEach((item) => {
-        const row = document.createElement("div");
-        row.className = "info-row";
-        row.innerHTML = `
-          <svg class="mini-icon" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="18"/><path d="M32 14v36M14 32h36"/></svg>
-          <div class="label"></div><div class="metric"></div>`;
-        row.querySelector(".label").textContent = item.label || item.name || "Info";
-        row.querySelector(".metric").textContent = item.value || item.metric || "—";
-        root.appendChild(row);
-      });
-    }
-
-    function applyFromJson(js) {
-      setStatus(js.status, js.sub || js.status_sub);
-      setQR(js.booking_url || DEFAULT_BOOKING_URL);
-
-      if (js.theme_image) document.getElementById("theme-img").src = js.theme_image;
-      if (js.office_hours) document.getElementById("office-hours").innerHTML = String(js.office_hours).replace(/\n/g, "<br>");
-      if (js.office_note) document.getElementById("office-note").textContent = js.office_note;
-      if (js.qr_note) document.getElementById("qr-note").textContent = js.qr_note;
-      if (js.info_title) document.getElementById("info-title").textContent = js.info_title;
-      if (js.info_items) renderInfo(js.info_items);
-    }
-
-    async function load() {
-      setStatus("in-office");
-      setQR(DEFAULT_BOOKING_URL);
-      try {
-        const url = new URL(STATUS_SOURCE);
-        url.searchParams.set("_ts", Date.now());
-        const res = await fetch(url.toString(), { cache: "no-store", headers: { Accept: "application/vnd.github+json" } });
-        if (!res.ok) return;
-        const data = await res.json();
-        const file = data.files && (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
-        if (!file || !file.content) return;
-        const js = JSON.parse(stripJsonComments(file.content));
-        applyFromJson(js);
-      } catch (e) {
-        console.error("status load error:", e);
-      }
-    }
-
-    load();
-  </script>
-</body>
-</html>
+</div>
