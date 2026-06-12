@@ -1,806 +1,432 @@
 <!DOCTYPE html>
 <html lang="en-US">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Need a Meeting?</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="favicons/apple-touch-icon.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="512x512"
-      href="favicons/icon-512x512.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="384x384"
-      href="favicons/icon-384x384.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="192x192"
-      href="favicons/icon-192x192.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="152x152"
-      href="favicons/icon-152x152.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="144x144"
-      href="favicons/icon-144x144.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="128x128"
-      href="favicons/icon-128x128.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="96x96"
-      href="favicons/icon-96x96.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="72x72"
-      href="favicons/icon-72x72.png"
-    />
-    <link rel="manifest" href="favicons/manifest.json" />
-    <meta name="color-scheme" content="light" />
-    <style>
-      /* === Monochrome, Landscape, Pixel-consistent Canvas === */
-      :root {
-        /* Design canvas matches your e‑ink panel (landscape). */
-        --design-w: 1872; /* px */
-        --design-h: 1404; /* px */
-        --fg: #000;
-        --bg: #fff;
-        --g7: #777;
-        --g6: #666;
-        --g4: #444;
-        --g2: #222;
-        --g9: #999;
-        --line: #000; /* heavy lines for e‑ink clarity */
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Office Door Sign v2</title>
+  <meta name="color-scheme" content="light" />
+  <style>
+    :root {
+      --design-w: 1872;
+      --design-h: 1404;
+      --black: #050505;
+      --ink: #111;
+      --muted: #5f5f5f;
+      --soft: #8b8b8b;
+      --line: #181818;
+      --panel: #f6f6f6;
+      --card: #ffffff;
+      --wash: #eeeeee;
+    }
 
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        background: var(--bg);
-        color: var(--fg);
-      }
-      body {
-        display: grid;
-        place-items: start;
-        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-      }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #fff;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-      /* Fixed-size stage scaled to viewport width (no reflow). */
-      .stage {
-        width: calc(var(--design-w) * 1px);
-        height: calc(var(--design-h) * 1px);
-        position: relative;
-        background: #fff;
-      }
-      .scale {
-        transform-origin: top left;
-        transform: scale(calc(100vw / (var(--design-w) * 1px)));
-      }
-      /* keep viewport height equal to scaled canvas; hide scrollbars */
-      body {
-        min-height: calc(100vw * (var(--design-h) / var(--design-w)));
-        /* overflow: hidden; */
-      }
+    body {
+      display: grid;
+      place-items: start;
+      min-height: calc(100vw * (var(--design-h) / var(--design-w)));
+      overflow: hidden;
+    }
 
-      /* Layout: Top 2/3 status; Bottom 1/3 split left/right */
-      .status-area {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 66.666%;
-        display: flex;
-        flex-direction: column; /* 竖向排布三行文字 */
-        justify-content: center; /* 垂直居中 */
-        align-items: center; /* 水平居中 */
-        text-align: center;
-        padding: 0; /* 去掉 40px/60px 的内边距偏移 */
-      }
-      .status-wrap {
-        display: flex;
-        flex-direction: column;
-        align-items: center; /* 文字块水平居中 */
-        text-align: center;
-        width: auto; /* 不再占满 100%，避免看起来偏右 */
-        max-width: 100%;
-        transform: translateX(
-          -0.5%
-        ); /* 轻微左移，修正视觉中心；需要可改为 -1%/-0.25% */
-      }
+    .stage {
+      width: calc(var(--design-w) * 1px);
+      height: calc(var(--design-h) * 1px);
+      transform-origin: top left;
+      transform: scale(calc(100vw / (var(--design-w) * 1px)));
+      display: grid;
+      grid-template-columns: 66.8% 33.2%;
+      background: #fff;
+      border: 4px solid var(--black);
+    }
 
-      .status-tag {
-        display: inline-block;
-        border: 8px solid var(--line);
-        padding: 16px 28px;
-        letter-spacing: 2px;
-        font: 800 48px/1 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-        margin-bottom: 36px; /* ← 新增这一行：原来几乎为 0，现在增加垂直间距 */
-      }
-      .status-text {
-        margin: 28px 0 10px;
-        letter-spacing: -1px;
-        font: 800 200px/0.95 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-      }
-      .status-sub {
-        opacity: 0.85;
-        letter-spacing: 0.2px;
-        font: 600 46px/1.35 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-      }
+    .presence {
+      position: relative;
+      display: grid;
+      grid-template-rows: 55% 45%;
+      min-width: 0;
+      overflow: hidden;
+    }
 
-      .divider {
-        position: absolute;
-        left: 0;
-        top: 66.666%;
-        width: 100%;
-        height: 0;
-        border-top: 10px solid var(--line);
-      }
+    .presence-copy {
+      padding: 92px 86px 34px 92px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-bottom: 4px solid var(--line);
+      background: #fff;
+    }
 
-      .bottom {
-        position: absolute;
-        left: 0;
-        top: 66.666%;
-        width: 100%;
-        height: 33.333%;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-      }
-      .panel {
-        padding: 36px 48px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
-      .panel + .panel {
-        border-left: 10px solid var(--line);
-      }
+    .eyebrow {
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 46px;
+    }
 
-      .h {
-        font: 800 72px/1.2 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-        margin: 0 0 10px;
-      }
-      .t {
-        font: 600 52px/1.4 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-        margin: 4px 0;
-      }
-      .muted {
-        opacity: 0.65;
-        font-weight: 600;
-      }
+    .status {
+      font-size: 176px;
+      line-height: 0.92;
+      font-weight: 900;
+      letter-spacing: -0.055em;
+      text-transform: uppercase;
+      max-width: 1050px;
+    }
 
-      /* QR block: black-only SVG via external generator to avoid gray edges */
-      .qr-row {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 68px;
-        align-items: center;
-      }
-      .qr {
-        width: 320px;
-        height: 320px;
-        background: #000;
-        mask: center/contain no-repeat;
-        -webkit-mask: center/contain no-repeat;
-      }
-      .qr-img {
-        width: 320px;
-        height: 320px;
-        display: block;
-        /* 让电子墨水屏呈现硬边不糊 */
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-        background: #fff;
-      }
+    .status-sub {
+      margin-top: 42px;
+      font-size: 46px;
+      line-height: 1.22;
+      font-weight: 560;
+      color: var(--muted);
+      max-width: 940px;
+    }
 
-      .cta {
-        font: 800 48px/1.15 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-      }
-      .footnote {
-        font: 600 32px/1.35 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-        opacity: 0.7;
-      }
-      .script {
-        font: 600 22px/1.35 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-        opacity: 0.7;
-      }
+    .theme {
+      position: relative;
+      overflow: hidden;
+      background: #eee;
+    }
 
-      /* Hairline helpers (use sparingly on e‑ink) */
-      .hair {
-        border-top: 3px solid var(--line);
-        opacity: 0.2;
-        margin-top: 12px;
-      }
+    .theme img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: grayscale(1) contrast(1.04);
+    }
 
-      /* Office Hours – weekly mini-gantt */
-      /* 标题改 ~48 */
-      .oh-title {
-        font: 800 48px/1.2 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-      }
+    .theme::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.16), rgba(255,255,255,0) 45%);
+      pointer-events: none;
+    }
 
-      /* 左下周时间轴整体 */
-      .oh {
-        display: grid;
-        gap: 10px;
-      }
+    .sidebar {
+      border-left: 5px solid var(--line);
+      display: grid;
+      grid-template-rows: 28.5% 35.5% 36%;
+      background: var(--card);
+    }
 
-      /* 顶部刻度（只渲染一行） */
-      .oh-scale {
-        position: relative;
-        height: 30px;
-        margin-bottom: 4px;
-      }
-      .oh-scale .tick {
-        position: absolute;
-        top: 0;
-        width: 2px;
-        height: 18px;
-        background: #000;
-        opacity: 0.35;
-      }
-      .oh-scale .tick-label {
-        position: absolute;
-        top: 18px;
-        transform: translateX(-50%);
-        font: 600 24px/1 JetBrains Mono, ui-monospace, SFMono-Regular, Menlo,
-          Consolas, "Liberation Mono", monospace;
-        opacity: 0.75;
-      }
+    .block {
+      padding: 54px 54px 44px 54px;
+      display: grid;
+      align-content: center;
+      border-bottom: 4px solid var(--line);
+      min-width: 0;
+    }
+    .block:last-child { border-bottom: 0; }
 
-      /* 每一行：左=星期几，右=条 */
-      .oh-row {
-        display: grid;
-        grid-template-columns: 86px 1fr;
-        gap: 10px;
-        align-items: center;
-      }
+    .block-head {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      align-items: start;
+      gap: 30px;
+      margin-bottom: 22px;
+    }
 
-      /* 星期几：等宽 + 全大写 */
-      .oh-day {
-        font: 700 36px/1 JetBrains Mono, ui-monospace, SFMono-Regular, Menlo,
-          Consolas, "Liberation Mono", monospace;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        text-align: right;
-      }
+    .icon {
+      width: 64px;
+      height: 64px;
+      stroke: var(--black);
+      stroke-width: 7;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
 
-      /* 顶部刻度：用与 .oh-row 相同的两列网格，让刻度与 bar 对齐 */
-      .oh-scale {
-        display: grid;
-        grid-template-columns: 86px 1fr;
-        align-items: start;
-        height: 40px;
-        margin-bottom: 6px;
-      }
-      .oh-scale-bar {
-        position: relative;
-        height: 40px;
-      }
-      .oh-scale-bar .tick-label {
-        position: absolute;
-        top: 0;
-        transform: translateX(-50%);
-        font: 600 20px/1 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-        opacity: 0.75;
-      }
-      .oh-scale-bar .tick {
-        position: absolute;
-        top: 22px;
-        width: 2px;
-        height: 14px;
-        background: #000;
-        opacity: 0.35;
-      }
+    .kicker {
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
 
-      /* 条：去圆角空心，改为浅灰底，黑色区段叠加 */
-      .oh-bar {
-        position: relative;
-        height: 34px;
-        background: #e9e9e9;
-        border: none;
-        outline: none;
-        overflow: visible;
-      }
-      .oh-slot {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        background: #000;
-      }
-      /* 标签：默认放黑段右侧；若放不下 JS 会改到左侧 */
-      .oh-slot-label {
-        position: absolute;
-        top: 50%;
-        transform: translate(8px, -50%);
-        font: 600 20px/1 Inter, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial;
-        white-space: nowrap;
-        color: #000;
-        pointer-events: none;
-      }
-      .oh-slot-label.left {
-        transform: translate(-8px, -50%) translateX(-100%);
-        text-align: right;
-      }
-      /* 左侧放置时 JS 会加上 .left 类 */
-      .oh-slot-label.left {
-        transform: translate(-8px, -50%) translateX(-100%);
-        text-align: right;
-      }
+    .value {
+      font-size: 50px;
+      line-height: 1.18;
+      font-weight: 720;
+      letter-spacing: -0.025em;
+    }
 
-      .oh-bar::before,
-      .oh-bar::after,
-      .oh-tick {
-        display: none !important;
-      }
-    </style>
-  </head>
-  <body>
-    <div
-      class="stage scale"
-      aria-label="Monochrome door display for e-ink (landscape)"
-    >
-      <!-- TOP: Status (2/3) -->
-      <section class="status-area">
-        <div class="status-wrap">
-          <div class="status-tag" id="status-tag">STATUS</div>
-          <div class="status-text" id="status-text">ON A CALL</div>
-          <div class="status-sub" id="status-sub">
-            I'm currently in a meeting. Please check back in a moment.
+    .note {
+      margin-top: 18px;
+      margin-left: 94px;
+      font-size: 31px;
+      line-height: 1.3;
+      font-weight: 560;
+      color: var(--muted);
+    }
+
+    .booking {
+      grid-template-rows: auto 1fr;
+    }
+
+    .qr-row {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      align-items: center;
+      gap: 42px;
+      margin-top: 6px;
+    }
+
+    .qr-img {
+      width: 240px;
+      height: 240px;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      background: #fff;
+      border: 0;
+    }
+
+    .qr-text {
+      font-size: 38px;
+      line-height: 1.18;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .arrow {
+      margin-top: 22px;
+      font-size: 62px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .info-grid {
+      display: grid;
+      gap: 25px;
+      margin-top: 8px;
+    }
+
+    .info-row {
+      display: grid;
+      grid-template-columns: 64px 1fr auto;
+      align-items: center;
+      gap: 24px;
+      min-height: 56px;
+    }
+
+    .mini-icon {
+      width: 50px;
+      height: 50px;
+      stroke: var(--black);
+      stroke-width: 6;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      justify-self: center;
+    }
+
+    .label {
+      font-size: 29px;
+      line-height: 1;
+      font-weight: 850;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+
+    .metric {
+      font-size: 32px;
+      line-height: 1;
+      font-weight: 650;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .state-meeting .presence-copy { background: var(--black); color: #fff; }
+    .state-meeting .status-sub { color: #d7d7d7; }
+    .state-meeting .eyebrow { color: #fff; }
+
+    .state-office .presence-copy { background: #fff; color: var(--black); }
+    .state-away .presence-copy { background: #f2f2f2; color: var(--black); }
+    .state-away .theme img { opacity: .72; contrast: .95; }
+
+    @media screen and (max-width: 900px) {
+      body { overflow: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage state-office" id="stage" aria-label="Office door sign">
+    <section class="presence" aria-label="Presence status">
+      <div class="presence-copy">
+        <div class="eyebrow">Status</div>
+        <div class="status" id="status-text">IN OFFICE</div>
+        <div class="status-sub" id="status-sub">Around today.</div>
+      </div>
+      <figure class="theme" aria-hidden="true">
+        <img id="theme-img" src="status-theme-placeholder.png" alt="" />
+      </figure>
+    </section>
+
+    <aside class="sidebar" aria-label="Office information">
+      <section class="block office-block">
+        <div class="block-head">
+          <svg class="icon" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="24" />
+            <path d="M32 17v17l13 8" />
+          </svg>
+          <div>
+            <div class="kicker">Office Hours</div>
+            <div class="value" id="office-hours">Mon–Fri<br />9:00–17:00</div>
+          </div>
+        </div>
+        <div class="note" id="office-note">Usually available by appointment.</div>
+      </section>
+
+      <section class="block booking">
+        <div class="kicker">Book a Meeting</div>
+        <div class="qr-row">
+          <img class="qr-img" id="qr" alt="Meeting booking QR code" decoding="sync" />
+          <div>
+            <div class="qr-text" id="qr-note">Schedule a meeting</div>
+            <div class="arrow">→</div>
           </div>
         </div>
       </section>
 
-      <div class="divider" aria-hidden="true"></div>
-
-      <!-- BOTTOM: 1/3 split -->
-      <section class="bottom">
-        <!-- Left: Office Hours -->
-        <!-- 左下：Office Hours 可视化（周时间轴） -->
-        <div class="panel">
-          <h2 class="h oh-title">Office Hours</h2>
-          <div class="oh-scale">
-            <div></div>
-            <div class="oh-scale-bar" id="oh-scale-bar"></div>
+      <section class="block info-block">
+        <div class="kicker" id="info-title">Today</div>
+        <div class="info-grid" id="info-grid">
+          <div class="info-row">
+            <svg class="mini-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 12v40M12 32h40M18 18l28 28M46 18L18 46" /></svg>
+            <div class="label">Pollen</div><div class="metric">High</div>
           </div>
-          <div id="oh-week" class="oh"></div>
-        </div>
-
-        <!-- Right: CTA + QR -->
-        <div class="panel">
-          <div class="qr-row">
-            <div>
-              <div class="cta" id="cta">
-                Can't make any?<br />Book my time →
-              </div>
-              <p class="footnote" id="qr-note">Scan to open booking page</p>
-              <div class="hair"></div>
-              <p class="script" id="qr-script">
-                🚧 Experimental; feedback welcome 🚧
-              </p>
-            </div>
-            <img class="qr-img" id="qr" alt="QR code" decoding="sync" />
+          <div class="info-row">
+            <svg class="mini-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M12 38c12 0 10-12 22-12 8 0 9 6 18 6M10 48h42M14 22h20" /></svg>
+            <div class="label">AQI</div><div class="metric">Good</div>
+          </div>
+          <div class="info-row">
+            <svg class="mini-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 42h28a11 11 0 0 0 0-22 17 17 0 0 0-32 7 8 8 0 0 0 4 15z" /></svg>
+            <div class="label">Weather</div><div class="metric">21°C</div>
+          </div>
+          <div class="info-row">
+            <svg class="mini-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 8a16 16 0 0 0-8 30v10h16V38A16 16 0 0 0 32 8zM25 56h14" /></svg>
+            <div class="label">Note</div><div class="metric">Step outside</div>
           </div>
         </div>
       </section>
-    </div>
+    </aside>
+  </main>
 
-    <script>
-      // ===== Config =====
-      const DEFAULT_BOOKING_URL =
-        "https://app.reclaim.ai/m/yuyang-wang/flexible-quick-meeting";
-      // Provide a remote JSON to drive the page. Use a Gist Raw URL or local status.json during dev.
-      // Example schema below.
-      // ---- 改成你的 Gist 信息 ----
-      const GIST_ID = "f96b0e927c21a42d247b626dceae243e";
-      const GIST_FILE = "status.json";
-      const STATUS_SOURCE = `https://api.github.com/gists/${GIST_ID}`;
-      // ----------------------------
+  <script>
+    const DEFAULT_BOOKING_URL = "https://app.reclaim.ai/m/yuyang-wang/flexible-quick-meeting";
+    const GIST_ID = "f96b0e927c21a42d247b626dceae243e";
+    const GIST_FILE = "status.json";
+    const STATUS_SOURCE = `https://api.github.com/gists/${GIST_ID}`;
 
-      // Status dictionary: key -> big headline + polite subline (door‑friendly, lightly witty)
-      const STATUS_COPY = {
-        "in-meeting": {
-          title: "ON A CALL",
-          sub: "I'm currently in a meeting. Please check back in a moment.",
-        },
-        busy: {
-          title: "FOCUS TIME",
-          sub: "I'm trying to get some work done. Please knock if urgent.",
-        },
-        knock: {
-          title: "KNOCK KNOCK",
-          sub: "I'm available for a quick chat if we haven't scheduled.",
-        },
-        ooo: {
-          title: "STEPPED OUT",
-          sub: "I'm currently out of office. Please check back or book a time.",
-        },
-        weekend: {
-          title: "WEEKEND MODE",
-          sub: "Please email me or book a time. Have a wonderful weekend!",
-        },
-      };
+    const STATUS_COPY = {
+      "in-office": { title: "IN OFFICE", sub: "Around today.", cls: "state-office" },
+      office: { title: "IN OFFICE", sub: "Around today.", cls: "state-office" },
+      in: { title: "IN OFFICE", sub: "Around today.", cls: "state-office" },
+      "in-meeting": { title: "IN MEETING", sub: "In a meeting now.", cls: "state-meeting" },
+      meeting: { title: "IN MEETING", sub: "In a meeting now.", cls: "state-meeting" },
+      "out-of-office": { title: "OUT OF OFFICE", sub: "Away from the office.", cls: "state-away" },
+      ooo: { title: "OUT OF OFFICE", sub: "Away from the office.", cls: "state-away" },
+      out: { title: "OUT OF OFFICE", sub: "Away from the office.", cls: "state-away" }
+    };
 
-      function setStatus(key, subOverride) {
-        const m = STATUS_COPY[key] || STATUS_COPY["busy"];
-        document.getElementById("status-text").textContent = m.title;
-        document.getElementById("status-sub").textContent =
-          subOverride || m.sub;
+    function normalizeStatus(raw) {
+      const k = String(raw || "in-office").trim().toLowerCase();
+      return STATUS_COPY[k] ? k : "in-office";
+    }
+
+    function setStatus(key, subOverride) {
+      const stage = document.getElementById("stage");
+      const k = normalizeStatus(key);
+      const m = STATUS_COPY[k];
+      stage.classList.remove("state-office", "state-meeting", "state-away");
+      stage.classList.add(m.cls);
+      document.getElementById("status-text").textContent = m.title;
+      document.getElementById("status-sub").textContent = subOverride || m.sub;
+    }
+
+    function setQR(url) {
+      const u = url || DEFAULT_BOOKING_URL;
+      const qr = document.getElementById("qr");
+      const svgUrl = `https://api.qrserver.com/v1/create-qr-code/?format=svg&size=420x420&data=${encodeURIComponent(u)}&color=000000&bgcolor=FFFFFF`;
+      const pngUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encodeURIComponent(u)}&color=000000&bgcolor=FFFFFF`;
+      qr.src = svgUrl;
+      qr.onerror = () => { qr.onerror = null; qr.src = pngUrl; };
+    }
+
+    function stripJsonComments(input) {
+      let out = "", inStr = false, esc = false, inBlk = false, inLine = false, quote = "";
+      for (let i = 0; i < input.length; i++) {
+        const c = input[i], n = input[i + 1];
+        if (inLine) { if (c === "\n") { inLine = false; out += c; } continue; }
+        if (inBlk) { if (c === "*" && n === "/") { inBlk = false; i++; } continue; }
+        if (inStr) { out += c; if (esc) { esc = false; continue; } if (c === "\\") { esc = true; continue; } if (c === quote) inStr = false; continue; }
+        if (c === "/" && n === "/") { inLine = true; i++; continue; }
+        if (c === "/" && n === "*") { inBlk = true; i++; continue; }
+        if (c === '"' || c === "'") { inStr = true; quote = c; out += c; continue; }
+        out += c;
       }
+      return out;
+    }
 
-      function setOffice(oh) {
-        if (!oh) return;
-        if (typeof oh === "string") {
-          const [l1, l2] = oh.split(" @ ");
-          if (l1)
-            document.getElementById("office-line-1").textContent = l1.trim();
-          if (l2)
-            document.getElementById("office-line-2").textContent = l2.trim();
-        } else if (typeof oh === "object") {
-          if (oh.line1)
-            document.getElementById("office-line-1").textContent = oh.line1;
-          if (oh.line2)
-            document.getElementById("office-line-2").textContent = oh.line2;
-          if (oh.note)
-            document.getElementById("office-note").textContent = oh.note;
-        }
+    function renderInfo(items) {
+      if (!Array.isArray(items) || items.length === 0) return;
+      const root = document.getElementById("info-grid");
+      root.innerHTML = "";
+      items.slice(0, 4).forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "info-row";
+        row.innerHTML = `
+          <svg class="mini-icon" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="18"/><path d="M32 14v36M14 32h36"/></svg>
+          <div class="label"></div><div class="metric"></div>`;
+        row.querySelector(".label").textContent = item.label || item.name || "Info";
+        row.querySelector(".metric").textContent = item.value || item.metric || "—";
+        root.appendChild(row);
+      });
+    }
+
+    function applyFromJson(js) {
+      setStatus(js.status, js.sub || js.status_sub);
+      setQR(js.booking_url || DEFAULT_BOOKING_URL);
+
+      if (js.theme_image) document.getElementById("theme-img").src = js.theme_image;
+      if (js.office_hours) document.getElementById("office-hours").innerHTML = String(js.office_hours).replace(/\n/g, "<br>");
+      if (js.office_note) document.getElementById("office-note").textContent = js.office_note;
+      if (js.qr_note) document.getElementById("qr-note").textContent = js.qr_note;
+      if (js.info_title) document.getElementById("info-title").textContent = js.info_title;
+      if (js.info_items) renderInfo(js.info_items);
+    }
+
+    async function load() {
+      setStatus("in-office");
+      setQR(DEFAULT_BOOKING_URL);
+      try {
+        const url = new URL(STATUS_SOURCE);
+        url.searchParams.set("_ts", Date.now());
+        const res = await fetch(url.toString(), { cache: "no-store", headers: { Accept: "application/vnd.github+json" } });
+        if (!res.ok) return;
+        const data = await res.json();
+        const file = data.files && (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
+        if (!file || !file.content) return;
+        const js = JSON.parse(stripJsonComments(file.content));
+        applyFromJson(js);
+      } catch (e) {
+        console.error("status load error:", e);
       }
+    }
 
-      function setQR(url) {
-        const u = url || DEFAULT_BOOKING_URL;
-        const $qr = document.getElementById("qr");
-
-        // 1) 先尝试 SVG（矢量，缩放清晰）
-        const svgUrl = `https://api.qrserver.com/v1/create-qr-code/?format=svg&size=360x360&data=${encodeURIComponent(
-          u
-        )}&color=000000&bgcolor=FFFFFF`;
-
-        // 2) 兜底 PNG（高分辨率，保证清晰）
-        const pngUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&data=${encodeURIComponent(
-          u
-        )}&color=000000&bgcolor=FFFFFF`;
-
-        // 先设 SVG
-        $qr.src = svgUrl;
-
-        // 如果 SVG 加载异常则回退到 PNG
-        $qr.onerror = () => {
-          $qr.onerror = null;
-          $qr.src = pngUrl;
-        };
-      }
-
-      // —— 安全去注释：支持 // 与 /* */，避免误删字符串里的 // ——
-      function stripJsonComments(input) {
-        let out = "",
-          inStr = false,
-          esc = false,
-          inBlk = false,
-          inLine = false,
-          quote = "";
-        for (let i = 0; i < input.length; i++) {
-          const c = input[i],
-            n = input[i + 1];
-          if (inLine) {
-            if (c === "\n") {
-              inLine = false;
-              out += c;
-            }
-            continue;
-          }
-          if (inBlk) {
-            if (c === "*" && n === "/") {
-              inBlk = false;
-              i++;
-            }
-            continue;
-          }
-          if (inStr) {
-            out += c;
-            if (esc) {
-              esc = false;
-              continue;
-            }
-            if (c === "\\") {
-              esc = true;
-              continue;
-            }
-            if (c === quote) {
-              inStr = false;
-            }
-            continue;
-          }
-          if (c === "/" && n === "/") {
-            inLine = true;
-            i++;
-            continue;
-          }
-          if (c === "/" && n === "*") {
-            inBlk = true;
-            i++;
-            continue;
-          }
-          if (c === '"' || c === "'") {
-            inStr = true;
-            quote = c;
-            out += c;
-            continue;
-          }
-          out += c;
-        }
-        return out;
-      }
-
-      function applyFromJson(js) {
-        const raw = js.status;
-        const k = String(raw || "")
-          .trim()
-          .toLowerCase(); // ← 加 trim()
-        const sub = js.sub || undefined;
-        console.log("[status] parsed:", { raw, k });
-        setStatus(k || "busy", sub);
-
-        // 从 office.line2 里尽量抽取地点作为默认地点（如果 schedule 项没有给）
-        const defaultLoc =
-          js.office && js.office.line2
-            ? String(js.office.line2)
-                .replace(/.*(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})\s*/, "")
-                .trim()
-            : "";
-
-        if (Array.isArray(js.schedule)) {
-          renderOfficeHours(js.schedule, {
-            start: "09:00",
-            end: "17:00",
-            days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-            defaultLoc,
-          });
-        } else if (js.office_hours) {
-          // 兼容旧的 office_hours 字符串：只画一天一段
-          const s = String(js.office_hours);
-          const dayMap = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-          const foundDay = dayMap.find((d) =>
-            s.toLowerCase().includes(d.toLowerCase())
-          );
-          const m = s.match(/(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})/);
-          const day = foundDay || "Mon";
-          const ranges = m ? [[m[1], m[2]]] : [];
-          renderOfficeHours([{ day, ranges }], {
-            start: "09:00",
-            end: "17:00",
-            days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-            defaultLoc,
-          });
-        } else {
-          renderOfficeHours([], {
-            start: "09:00",
-            end: "17:00",
-            days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-          });
-        }
-        // setOffice(js.office || js.office_hours);
-
-        const booking = js.booking_url || DEFAULT_BOOKING_URL;
-        setQR(booking);
-
-        if (js.cta) document.getElementById("cta").innerHTML = js.cta;
-        if (js.qr_note)
-          document.getElementById("qr-note").textContent = js.qr_note;
-        if (js.qr_script)
-          document.getElementById("qr-script").textContent = js.qr_script;
-      }
-
-      // "HH:MM" -> 分钟
-      function t2m(s) {
-        const [h, m] = s.split(":").map(Number);
-        return h * 60 + (m || 0);
-      }
-
-      // 渲染周时间轴（顶部刻度 + 灰底条 + 智能标签放置）
-      function renderOfficeHours(schedule, opts) {
-        const root = document.getElementById("oh-week");
-        if (!root) return;
-        root.innerHTML = "";
-
-        const cfg = Object.assign(
-          {
-            start: "09:00",
-            end: "17:00",
-            days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-            defaultLoc: "",
-          },
-          opts || {}
-        );
-
-        const minM = t2m(cfg.start),
-          maxM = t2m(cfg.end),
-          span = Math.max(1, maxM - minM);
-
-        /* 顶部刻度：9/11/13/15/17，对齐 bar；文字在上、竖线在下 */
-        const scaleBar = document.getElementById("oh-scale-bar");
-        if (scaleBar) {
-          scaleBar.innerHTML = "";
-          const step = 60; // 1h
-          const first = Math.ceil(minM / step) * step;
-          for (let m = first; m <= maxM; m += step) {
-            const pct = ((m - minM) / span) * 100;
-            const hour = Math.floor(m / 60); // 9 / 10 / 11 / ...
-            const lab = document.createElement("div");
-            lab.className = "tick-label";
-            lab.style.left = pct + "%";
-            lab.textContent = String(hour);
-            const tick = document.createElement("div");
-            tick.className = "tick";
-            tick.style.left = pct + "%";
-            scaleBar.appendChild(lab);
-            scaleBar.appendChild(tick);
-          }
-        }
-
-        /* 归一化数据：{ MON:[[s,e,loc],...], ... } */
-        const map = {};
-        (cfg.days || []).forEach((d) => (map[d.toUpperCase()] = []));
-        if (Array.isArray(schedule)) {
-          schedule.forEach((item) => {
-            const dRaw = (item.day || item.D || "").slice(0, 3).toUpperCase();
-            const d = map[dRaw] ? dRaw : (cfg.days[0] || "MON").toUpperCase();
-            (item.ranges || item.slots || []).forEach((r) => {
-              if (Array.isArray(r) && r.length >= 2) {
-                const loc =
-                  (r[2] && String(r[2]).trim()) || cfg.defaultLoc || "";
-                map[d].push([r[0], r[1], loc]);
-              }
-            });
-          });
-        }
-
-        /* 各行渲染 */
-        (cfg.days || Object.keys(map)).forEach((dayRaw) => {
-          const day = dayRaw.toUpperCase();
-          const row = document.createElement("div");
-          row.className = "oh-row";
-
-          const lab = document.createElement("div");
-          lab.className = "oh-day";
-          lab.textContent = day;
-          const bar = document.createElement("div");
-          bar.className = "oh-bar";
-
-          (map[day] || []).forEach(([s, e, loc]) => {
-            const sm = Math.max(minM, t2m(s)),
-              em = Math.min(maxM, t2m(e));
-            if (em <= sm) return;
-
-            const leftPct = ((sm - minM) / span) * 100;
-            const widthPct = ((em - sm) / span) * 100;
-
-            const slot = document.createElement("div");
-            slot.className = "oh-slot";
-            slot.style.left = leftPct + "%";
-            slot.style.width = widthPct + "%";
-            bar.appendChild(slot);
-
-            // 标签：默认放右侧；布局完成后检查越界再切左侧
-            const label = document.createElement("div");
-            label.className = "oh-slot-label";
-            const timeText = `${s}–${e}`;
-            label.textContent = loc ? `${timeText} · ${loc}` : timeText;
-            label.style.left = leftPct + widthPct + "%";
-            bar.appendChild(label);
-
-            // 用 rAF 等一帧，确保尺寸和缩放稳定后再检测
-            requestAnimationFrame(() => {
-              const barRect = bar.getBoundingClientRect();
-              const labRect = label.getBoundingClientRect();
-              if (labRect.right > barRect.right - 4) {
-                label.classList.add("left");
-                label.style.left = leftPct + "%";
-              }
-            });
-          });
-
-          row.appendChild(lab);
-          row.appendChild(bar);
-          root.appendChild(row);
-        });
-      }
-
-      async function load() {
-        // 默认显示占位内容（以防网络失败）
-        setStatus("busy");
-        setQR(DEFAULT_BOOKING_URL);
-
-        try {
-          // 1️⃣ 通过 GitHub API 拉取 Gist（而不是 Raw 链接）
-          const url = new URL(STATUS_SOURCE);
-          url.searchParams.set("_ts", Date.now()); // 防缓存
-          const res = await fetch(url.toString(), {
-            cache: "no-store",
-            headers: { Accept: "application/vnd.github+json" },
-          });
-
-          // 2️⃣ 网络错误或非 2xx 时直接返回
-          if (!res.ok) {
-            console.warn("Gist fetch failed:", res.status);
-            return;
-          }
-
-          // 3️⃣ 解析 JSON（包含多个文件）
-          const data = await res.json();
-          const file =
-            data.files &&
-            (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
-          if (!file || !file.content) {
-            console.warn("Gist file not found:", GIST_FILE);
-            return;
-          }
-
-          // 4️⃣ 允许文件中出现 // 或 /* */ 注释
-          const clean = stripJsonComments(file.content);
-
-          // 5️⃣ 尝试解析为对象
-          let js;
-          try {
-            js = JSON.parse(clean);
-          } catch (e) {
-            console.error("JSON parse error:", e);
-            document.getElementById("status-sub").textContent =
-              "status.json parse error";
-            return;
-          }
-
-          // 6️⃣ 成功解析后更新页面
-          applyFromJson(js);
-          console.log("[status] applied:", js);
-        } catch (e) {
-          console.error("Gist load error:", e);
-          document.getElementById("status-sub").textContent =
-            "status.json fetch error";
-        }
-      }
-
-      load();
-    </script>
-  </body>
+    load();
+  </script>
+</body>
 </html>
