@@ -328,24 +328,25 @@
       const GIST_ID = "f96b0e927c21a42d247b626dceae243e";
       const GIST_FILE = "status.json";
       const STATUS_SOURCE = `https://api.github.com/gists/${GIST_ID}`;
+      const ASSET_BASE = "https://wangyy.phd/book-my-time/"
 
       const STATUS_MAP = {
         busy: {
           title: "IN OFFICE",
 
-          img: "status-theme-in.png",
+          img: "${ASSET_BASE}status-theme-in.png",
         },
 
         ooo: {
           title: "OUT OF OFFICE",
 
-          img: "status-theme-out.png",
+          img: "${ASSET_BASE}status-theme-out.png",
         },
 
         "in-meeting": {
           title: "IN MEETING",
 
-          img: "status-theme-meeting.png",
+          img: "${ASSET_BASE}status-theme-meeting.png",
         },
       };
 
