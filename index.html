@@ -415,22 +415,28 @@
         return out;
       }
 
-      function setTheme(statusKey) {
+      async function setTheme(statusKey) {
         const key = String(statusKey || "busy")
           .trim()
           .toLowerCase();
-
         const s = STATUS_MAP[key] || STATUS_MAP.busy;
 
         document.getElementById("status-text").textContent = s.title;
 
         const bg = document.getElementById("theme-bg");
 
-        bg.onload = () => {
-          refreshGlass();
-        };
-
         bg.src = s.img;
+
+        try {
+          await bg.decode();
+        } catch (e) {
+          // ignore decode errors
+        }
+
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+
+        refreshGlass();
       }
 
       function setQR(url) {
@@ -512,10 +518,12 @@
         location.textContent = loc || "ITE 461";
       }
 
-      function applyFromJson(js) {
-        setTheme(js.status || "busy");
+      async function applyFromJson(js) {
+        await setTheme(js.status || "busy");
+
         document.getElementById("status-sub").textContent =
           `as of ${formatMainUpdatedAt(js.updated_at)}`;
+
         setOffice(js);
         setQR(js.booking_url || DEFAULT_BOOKING_URL);
 
@@ -536,6 +544,11 @@
         if (js.today_note) {
           document.getElementById("today-main").textContent = js.today_note;
         }
+
+        await new Promise(requestAnimationFrame);
+        refreshGlass();
+
+        document.querySelector(".layout").style.visibility = "visible";
       }
 
       async function load() {
@@ -567,10 +580,7 @@
 
           const clean = stripJsonComments(file.content);
           const js = JSON.parse(clean);
-          applyFromJson(js);
-          requestAnimationFrame(() => {
-            document.querySelector(".layout").style.visibility = "visible";
-          });
+          await applyFromJson(js);
         } catch (e) {
           console.error("Status load error:", e);
 
