@@ -1,598 +1,628 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en-US">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Office Status</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Office Status</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
 
-<style>
-:root {
-  --w: 1872;
-  --h: 1404;
+    <style>
+      :root {
+        --w: 1872;
+        --h: 1404;
 
-  --ink: #090909;
-  --muted: #555;
-  --soft: #777;
+        --ink: #090909;
+        --muted: #555;
+        --soft: #777;
 
-  --glass-border-lo: rgba(0, 0, 0, 0.08);
-}
+        --glass-border-lo: rgba(0, 0, 0, 0.08);
+      }
 
-html,
-body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: var(--ink);
-}
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        color: var(--ink);
+      }
 
-body {
-  display: grid;
-  place-items: start;
-}
+      body {
+        display: grid;
+        place-items: start;
+      }
 
-.stage {
-  width: calc(var(--w) * 1px);
-  height: calc(var(--h) * 1px);
-  position: relative;
-  overflow: hidden;
-}
+      .stage {
+        width: calc(var(--w) * 1px);
+        height: calc(var(--h) * 1px);
+        position: relative;
+        overflow: hidden;
+      }
 
-.scale {
-  transform-origin: top left;
-  transform: scale(calc(100vw / (var(--w) * 1px)));
-}
+      .scale {
+        transform-origin: top left;
+        transform: scale(calc(100vw / (var(--w) * 1px)));
+      }
 
-.bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: grayscale(1);
-  opacity: 0.82;
-  z-index: 0;
-}
+      .bg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: grayscale(1);
+        opacity: 0.82;
+        z-index: 0;
+      }
 
-.bg-fade {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,0.08) 0%,
-      rgba(255,255,255,0.14) 42%,
-      rgba(255,255,255,0.20) 72%,
-      rgba(255,255,255,0.26) 100%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,0.42) 0%,
-      rgba(255,255,255,0.08) 48%,
-      rgba(255,255,255,0.00) 100%
-    );
-}
+      .bg-fade {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background:
+          linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.08) 0%,
+            rgba(255, 255, 255, 0.14) 42%,
+            rgba(255, 255, 255, 0.2) 72%,
+            rgba(255, 255, 255, 0.26) 100%
+          ),
+          linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.42) 0%,
+            rgba(255, 255, 255, 0.08) 48%,
+            rgba(255, 255, 255, 0) 100%
+          );
+      }
 
-.abstract-meeting-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  opacity: 1;
-  background:
-    radial-gradient(circle at 20% 72%, rgba(0,0,0,0.12) 0 2px, transparent 3px) 0 0 / 18px 18px,
-    radial-gradient(circle at 30% 70%, transparent 0 78px, rgba(0,0,0,0.08) 79px 82px, transparent 83px),
-    radial-gradient(circle at 43% 58%, transparent 0 125px, rgba(0,0,0,0.07) 126px 130px, transparent 131px),
-    radial-gradient(circle at 58% 78%, transparent 0 155px, rgba(0,0,0,0.06) 156px 160px, transparent 161px),
-    radial-gradient(circle at 75% 36%, transparent 0 95px, rgba(0,0,0,0.05) 96px 99px, transparent 100px),
-    #f7f7f7;
-}
+      .abstract-meeting-bg {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        opacity: 1;
+        background:
+          radial-gradient(
+              circle at 20% 72%,
+              rgba(0, 0, 0, 0.12) 0 2px,
+              transparent 3px
+            )
+            0 0 / 18px 18px,
+          radial-gradient(
+            circle at 30% 70%,
+            transparent 0 78px,
+            rgba(0, 0, 0, 0.08) 79px 82px,
+            transparent 83px
+          ),
+          radial-gradient(
+            circle at 43% 58%,
+            transparent 0 125px,
+            rgba(0, 0, 0, 0.07) 126px 130px,
+            transparent 131px
+          ),
+          radial-gradient(
+            circle at 58% 78%,
+            transparent 0 155px,
+            rgba(0, 0, 0, 0.06) 156px 160px,
+            transparent 161px
+          ),
+          radial-gradient(
+            circle at 75% 36%,
+            transparent 0 95px,
+            rgba(0, 0, 0, 0.05) 96px 99px,
+            transparent 100px
+          ),
+          #f7f7f7;
+      }
 
-.layout {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  display: grid;
-  grid-template-columns: 1fr 560px;
-}
+      .layout {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: 1fr 560px;
+      }
 
-.hero {
-  position: relative;
-  padding: 360px 90px 90px 108px;
-}
+      .hero {
+        position: relative;
+        padding: 360px 90px 90px 108px;
+      }
 
-.status {
-  font-size: 172px;
-  line-height: 0.88;
-  font-weight: 900;
-  /* letter-spacing: -0.078em; */
-  text-transform: uppercase;
-  margin: 0 0 34px;
-  max-width: 1050px;
-}
+      .status {
+        font-size: 172px;
+        line-height: 0.88;
+        font-weight: 900;
+        /* letter-spacing: -0.078em; */
+        text-transform: uppercase;
+        margin: 0 0 34px;
+        max-width: 1050px;
+      }
 
-.sub {
-  max-width: 760px;
-  font-size: 42px;
-  line-height: 1.22;
-  font-weight: 620;
-  color: var(--muted);
-  margin: 0;
-}
+      .sub {
+        max-width: 760px;
+        font-size: 42px;
+        line-height: 1.22;
+        font-weight: 620;
+        color: var(--muted);
+        margin: 0;
+      }
 
-.identity {
-  position: absolute;
-  left: 110px;
-  bottom: 76px;
-  z-index: 3;
-  font-size: 25px;
-  line-height: 1.32;
-  font-weight: 650;
-  color: rgba(0,0,0,0.62);
-}
+      .identity {
+        position: absolute;
+        left: 110px;
+        bottom: 76px;
+        z-index: 3;
+        font-size: 25px;
+        line-height: 1.32;
+        font-weight: 650;
+        color: rgba(0, 0, 0, 0.62);
+      }
 
-.identity strong {
-  display: block;
-  font-size: 30px;
-  color: rgba(0,0,0,0.82);
-  margin-bottom: 4px;
-}
+      .identity strong {
+        display: block;
+        font-size: 30px;
+        color: rgba(0, 0, 0, 0.82);
+        margin-bottom: 4px;
+      }
 
-.side {
-  padding: 70px 64px 70px 0;
-  display: grid;
-  grid-template-rows: 0.78fr 1.34fr 0.96fr;
-  gap: 28px;
-  min-height: 0;
-}
+      .side {
+        padding: 70px 64px 70px 0;
+        display: grid;
+        grid-template-rows: 0.78fr 1.34fr 0.96fr;
+        gap: 28px;
+        min-height: 0;
+      }
 
-/* Liquid glass cards */
-.card {
-  position: relative;
-  background: rgba(255,255,255,0.10);
-  border-radius: 42px;
-  border: 1.8px solid rgba(255,255,255,0.45);
-  box-shadow:
-    0 26px 70px rgba(0,0,0,0.16),
-    inset 0 1.5px 0 rgba(255,255,255,0.62),
-    inset 0 -1px 0 rgba(0,0,0,0.06);
-  padding: 34px 38px;
-  overflow: hidden;
-  backdrop-filter: blur(10px) contrast(1.08);
-  -webkit-backdrop-filter: blur(10px) contrast(1.08);
-}
+      /* Liquid glass cards */
+      .card {
+        position: relative;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 42px;
+        border: 1.8px solid rgba(255, 255, 255, 0.45);
+        box-shadow:
+          0 26px 70px rgba(0, 0, 0, 0.16),
+          inset 0 1.5px 0 rgba(255, 255, 255, 0.62),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+        padding: 34px 38px;
+        overflow: hidden;
+        backdrop-filter: blur(10px) contrast(1.08);
+        -webkit-backdrop-filter: blur(10px) contrast(1.08);
+      }
 
-.card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,0.24) 0%,
-      rgba(255,255,255,0.04) 42%,
-      rgba(255,255,255,0.16) 100%
-    );
-}
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        background: linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.24) 0%,
+          rgba(255, 255, 255, 0.04) 42%,
+          rgba(255, 255, 255, 0.16) 100%
+        );
+      }
 
-.card::after {
-  content: "";
-  position: absolute;
-  inset: 1.5px;
-  border-radius: 40px;
-  pointer-events: none;
-  box-shadow:
-    inset 10px 12px 28px rgba(255,255,255,0.16),
-    inset -10px -12px 26px rgba(0,0,0,0.055);
-}
+      .card::after {
+        content: "";
+        position: absolute;
+        inset: 1.5px;
+        border-radius: 40px;
+        pointer-events: none;
+        box-shadow:
+          inset 10px 12px 28px rgba(255, 255, 255, 0.16),
+          inset -10px -12px 26px rgba(0, 0, 0, 0.055);
+      }
 
-.card > * {
-  position: relative;
-  z-index: 1;
-}
+      .card > * {
+        position: relative;
+        z-index: 1;
+      }
 
-.qr-card {
-  background: rgba(255,255,255,0.10);
-}
+      .qr-card {
+        background: rgba(255, 255, 255, 0.1);
+      }
 
-.card-title {
-  font-size: 27px;
-  font-weight: 860;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  margin: 0 0 22px;
-}
+      .card-title {
+        font-size: 27px;
+        font-weight: 860;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+        margin: 0 0 22px;
+      }
 
-.office-main {
-  font-size: 42px;
-  line-height: 1.08;
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  margin: 0;
-}
+      .office-main {
+        font-size: 42px;
+        line-height: 1.08;
+        font-weight: 800;
+        letter-spacing: -0.035em;
+        margin: 0;
+      }
 
-.office-note {
-  margin-top: 18px;
-  font-size: 25px;
-  line-height: 1.26;
-  font-weight: 620;
-  color: var(--muted);
-}
+      .office-note {
+        margin-top: 18px;
+        font-size: 25px;
+        line-height: 1.26;
+        font-weight: 620;
+        color: var(--muted);
+      }
 
-.qr-img {
-  width: 275px;
-  height: 275px;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  margin: 8px 0 26px;
-  background: rgba(255,255,255,0.94);
-  border-radius: 22px;
-  padding: 16px;
-  box-shadow:
-    0 10px 28px rgba(0,0,0,0.10),
-    inset 0 1px 0 rgba(255,255,255,0.9);
-}
+      .qr-img {
+        width: 275px;
+        height: 275px;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        margin: 8px 0 26px;
+        background: rgba(255, 255, 255, 0.94);
+        border-radius: 22px;
+        padding: 16px;
+        box-shadow:
+          0 10px 28px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      }
 
-.qr-copy {
-  font-size: 34px;
-  line-height: 1.12;
-  font-weight: 800;
-  letter-spacing: -0.035em;
-}
+      .qr-copy {
+        font-size: 34px;
+        line-height: 1.12;
+        font-weight: 800;
+        letter-spacing: -0.035em;
+      }
 
-.qr-sub {
-  margin-top: 10px;
-  font-size: 24px;
-  line-height: 1.25;
-  color: var(--muted);
-  font-weight: 620;
-}
+      .qr-sub {
+        margin-top: 10px;
+        font-size: 24px;
+        line-height: 1.25;
+        color: var(--muted);
+        font-weight: 620;
+      }
 
-.today-main {
-  font-size: 30px;
-  line-height: 1.24;
-  font-weight: 760;
-  margin: 0 0 22px;
-  letter-spacing: -0.025em;
-}
+      .today-main {
+        font-size: 30px;
+        line-height: 1.24;
+        font-weight: 760;
+        margin: 0 0 22px;
+        letter-spacing: -0.025em;
+      }
 
-.today-meta {
-  display: grid;
-  gap: 12px;
-  font-size: 25px;
-  line-height: 1.25;
-  font-weight: 620;
-  color: var(--muted);
-}
+      .today-meta {
+        display: grid;
+        gap: 12px;
+        font-size: 25px;
+        line-height: 1.25;
+        font-weight: 620;
+        color: var(--muted);
+      }
 
-.today-meta span {
-  color: var(--ink);
-  font-weight: 780;
-}
-</style>
-</head>
+      .today-meta span {
+        color: var(--ink);
+        font-weight: 780;
+      }
+    </style>
+  </head>
 
-<body>
-<div class="stage scale">
-  <img class="bg" id="theme-bg" src="status-theme-in.png" />
-  <div class="abstract-meeting-bg" id="meeting-bg" hidden></div>
-  <div class="bg-fade"></div>
+  <body>
+    <div class="stage scale">
+      <img class="bg" id="theme-bg" src="status-theme-in.png" />
+      <div class="abstract-meeting-bg" id="meeting-bg" hidden></div>
+      <div class="bg-fade"></div>
 
-  <main class="layout">
-    <section class="hero">
-      <h1 class="status" id="status-text">IN OFFICE</h1>
-      <p class="sub" id="status-sub">as of -</p>
-    </section>
+      <main class="layout">
+        <section class="hero">
+          <h1 class="status" id="status-text">IN OFFICE</h1>
+          <p class="sub" id="status-sub">as of -</p>
+        </section>
 
-    <aside class="side">
-      <section class="card">
-        <h2 class="card-title">Office Hours</h2>
-        <p class="office-main" id="office-main">Tue / Thu<br />14:00–15:00</p>
-        <div class="office-note" id="office-note">ITE 461</div>
-      </section>
+        <aside class="side">
+          <section class="card">
+            <h2 class="card-title">Office Hours</h2>
+            <p class="office-main" id="office-main">
+              Tue / Thu<br />14:00–15:00
+            </p>
+            <div class="office-note" id="office-note">ITE 461</div>
+          </section>
 
-      <section class="card qr-card">
-        <h2 class="card-title">Book a Time</h2>
-        <img class="qr-img" id="qr" alt="Booking QR" />
-        <div class="qr-copy" id="cta-text">Schedule a meeting</div>
-        <div class="qr-sub" id="qr-note">Scan to open booking page</div>
-      </section>
+          <section class="card qr-card">
+            <h2 class="card-title">Book a Time</h2>
+            <img class="qr-img" id="qr" alt="Booking QR" />
+            <div class="qr-copy" id="cta-text">Schedule a meeting</div>
+            <div class="qr-sub" id="qr-note">Scan to open booking page</div>
+          </section>
 
-      <section class="card">
-        <h2 class="card-title">Today</h2>
-        <p class="today-main" id="today-main">
-          Thinking about photonic chiplet interconnects.
-        </p>
-        <div class="today-meta">
-          <div>Updated: <span id="updated-at">—</span></div>
-          <div>Location: <span id="location">ITE 461</span></div>
+          <section class="card">
+            <h2 class="card-title">Today</h2>
+            <p class="today-main" id="today-main">
+              Thinking about photonic chiplet interconnects.
+            </p>
+            <div class="today-meta">
+              <div>Updated: <span id="updated-at">—</span></div>
+              <div>Location: <span id="location">ITE 461</span></div>
+            </div>
+          </section>
+        </aside>
+
+        <div class="identity">
+          <strong>Yuyang Wang</strong>
+          Electrical &amp; Computer Engineering<br />
+          University of Connecticut
         </div>
-      </section>
-    </aside>
-
-    <div class="identity">
-      <strong>Yuyang Wang</strong>
-      Electrical &amp; Computer Engineering<br />
-      University of Connecticut
+      </main>
     </div>
-  </main>
-</div>
 
-<script>
-const DEFAULT_BOOKING_URL =
-  "https://app.reclaim.ai/m/yuyang-wang/quick-meeting";
+    <script>
+      const DEFAULT_BOOKING_URL =
+        "https://app.reclaim.ai/m/yuyang-wang/quick-meeting";
 
-const GIST_ID = "f96b0e927c21a42d247b626dceae243e";
-const GIST_FILE = "status.json";
-const STATUS_SOURCE = `https://api.github.com/gists/${GIST_ID}`;
+      const GIST_ID = "f96b0e927c21a42d247b626dceae243e";
+      const GIST_FILE = "status.json";
+      const STATUS_SOURCE = `https://api.github.com/gists/${GIST_ID}`;
 
-const STATUS_MAP = {
-  "in": {
-    title: "IN OFFICE",
-    sub: "Available today.",
-    img: "status-theme-in.png"
-  },
-  "in-office": {
-    title: "IN OFFICE",
-    sub: "Available today.",
-    img: "status-theme-in.png"
-  },
-  "office": {
-    title: "IN OFFICE",
-    sub: "Available today.",
-    img: "status-theme-in.png"
-  },
-  "meeting": {
-    title: "IN MEETING",
-    sub: "Currently in a meeting.",
-    img: "status-theme-meeting.png",
-    abstract: true
-  },
-  "in-meeting": {
-    title: "IN MEETING",
-    sub: "Currently in a meeting.",
-    img: "status-theme-meeting.png",
-    abstract: true
-  },
-  "ooo": {
-    title: "OUT OF OFFICE",
-    sub: "Away from office.",
-    img: "status-theme-out.png"
-  },
-  "out": {
-    title: "OUT OF OFFICE",
-    sub: "Away from office.",
-    img: "status-theme-out.png"
-  },
-  "out-of-office": {
-    title: "OUT OF OFFICE",
-    sub: "Away from office.",
-    img: "status-theme-out.png"
-  }
-};
+      const STATUS_MAP = {
+        busy: {
+          title: "IN OFFICE",
 
-function stripJsonComments(input) {
-  let out = "", inStr = false, esc = false, inBlk = false, inLine = false, quote = "";
-  for (let i = 0; i < input.length; i++) {
-    const c = input[i], n = input[i + 1];
-    if (inLine) {
-      if (c === "\n") {
-        inLine = false;
-        out += c;
+          img: "status-theme-in.png",
+        },
+
+        ooo: {
+          title: "OUT OF OFFICE",
+
+          img: "status-theme-out.png",
+        },
+
+        "in-meeting": {
+          title: "IN MEETING",
+
+          img: "status-theme-meeting.png",
+
+          abstract: true,
+        },
+      };
+
+      function stripJsonComments(input) {
+        let out = "",
+          inStr = false,
+          esc = false,
+          inBlk = false,
+          inLine = false,
+          quote = "";
+        for (let i = 0; i < input.length; i++) {
+          const c = input[i],
+            n = input[i + 1];
+          if (inLine) {
+            if (c === "\n") {
+              inLine = false;
+              out += c;
+            }
+            continue;
+          }
+          if (inBlk) {
+            if (c === "*" && n === "/") {
+              inBlk = false;
+              i++;
+            }
+            continue;
+          }
+          if (inStr) {
+            out += c;
+            if (esc) {
+              esc = false;
+              continue;
+            }
+            if (c === "\\") {
+              esc = true;
+              continue;
+            }
+            if (c === quote) inStr = false;
+            continue;
+          }
+          if (c === "/" && n === "/") {
+            inLine = true;
+            i++;
+            continue;
+          }
+          if (c === "/" && n === "*") {
+            inBlk = true;
+            i++;
+            continue;
+          }
+          if (c === '"' || c === "'") {
+            inStr = true;
+            quote = c;
+            out += c;
+            continue;
+          }
+          out += c;
+        }
+        return out;
       }
-      continue;
-    }
-    if (inBlk) {
-      if (c === "*" && n === "/") {
-        inBlk = false;
-        i++;
+
+      function setTheme(statusKey) {
+        const key = String(statusKey || "busy")
+          .trim()
+          .toLowerCase();
+
+        const s = STATUS_MAP[key] || STATUS_MAP.busy;
+
+        document.getElementById("status-text").textContent = s.title;
+
+        const bg = document.getElementById("theme-bg");
+
+        const meetingBg = document.getElementById("meeting-bg");
+
+        if (s.abstract) {
+          bg.hidden = true;
+
+          meetingBg.hidden = false;
+
+          bg.src = s.img;
+
+          bg.onload = () => {
+            bg.hidden = false;
+
+            meetingBg.hidden = true;
+          };
+
+          bg.onerror = () => {
+            bg.hidden = true;
+
+            meetingBg.hidden = false;
+          };
+        } else {
+          meetingBg.hidden = true;
+
+          bg.hidden = false;
+
+          bg.src = s.img;
+        }
       }
-      continue;
-    }
-    if (inStr) {
-      out += c;
-      if (esc) {
-        esc = false;
-        continue;
+
+      function setQR(url) {
+        const u = url || DEFAULT_BOOKING_URL;
+        const qr = document.getElementById("qr");
+
+        const svgUrl = `https://api.qrserver.com/v1/create-qr-code/?format=svg&size=420x420&data=${encodeURIComponent(u)}&color=000000&bgcolor=FFFFFF`;
+
+        const pngUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&data=${encodeURIComponent(u)}&color=000000&bgcolor=FFFFFF`;
+
+        qr.src = svgUrl;
+        qr.onerror = () => {
+          qr.onerror = null;
+          qr.src = pngUrl;
+        };
       }
-      if (c === "\\") {
-        esc = true;
-        continue;
+
+      function formatMainUpdatedAt(s) {
+        if (!s) return "—";
+
+        const d = new Date(s);
+        if (Number.isNaN(d.getTime())) return "—";
+
+        const datePart = d.toLocaleDateString("en-US", {
+          timeZone: "America/New_York",
+          month: "short",
+          day: "numeric",
+        });
+
+        const timePart = d.toLocaleTimeString("en-US", {
+          timeZone: "America/New_York",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+
+        return `${datePart}, ${timePart}`;
       }
-      if (c === quote) inStr = false;
-      continue;
-    }
-    if (c === "/" && n === "/") {
-      inLine = true;
-      i++;
-      continue;
-    }
-    if (c === "/" && n === "*") {
-      inBlk = true;
-      i++;
-      continue;
-    }
-    if (c === '"' || c === "'") {
-      inStr = true;
-      quote = c;
-      out += c;
-      continue;
-    }
-    out += c;
-  }
-  return out;
-}
 
-function setTheme(statusKey) {
-  const key = String(statusKey || "in").trim().toLowerCase();
-  const s = STATUS_MAP[key] || STATUS_MAP["in"];
+      function formatUpdatedAt(s) {
+        if (!s) return "—";
+        const d = new Date(s);
+        if (Number.isNaN(d.getTime())) return "—";
+        return d.toLocaleString("en-US", {
+          timeZone: "America/New_York",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+      }
 
-  document.getElementById("status-text").textContent = s.title;
+      function setOffice(js) {
+        const officeMain = document.getElementById("office-main");
+        const officeNote = document.getElementById("office-note");
+        const location = document.getElementById("location");
 
-  const bg = document.getElementById("theme-bg");
-  const meetingBg = document.getElementById("meeting-bg");
+        let main = "By appointment";
+        let note = "";
+        let loc = "";
 
-  if (s.abstract) {
-    bg.hidden = true;
-    meetingBg.hidden = false;
-    bg.src = s.img;
-    bg.onload = () => {
-      bg.hidden = false;
-      meetingBg.hidden = true;
-    };
-    bg.onerror = () => {
-      bg.hidden = true;
-      meetingBg.hidden = false;
-    };
-  } else {
-    meetingBg.hidden = true;
-    bg.hidden = false;
-    bg.src = s.img;
-  }
-}
+        if (js.office_hours) {
+          main = String(js.office_hours)
+            .replace(/\s+/g, " ")
+            .replace("Tue/Thu", "Tue / Thu")
+            .replace("14:00-15:00", "14:00–15:00");
+        }
 
-function setQR(url) {
-  const u = url || DEFAULT_BOOKING_URL;
-  const qr = document.getElementById("qr");
+        if (js.office) {
+          if (js.office.line1) main = js.office.line1;
+          if (js.office.line2) loc = js.office.line2;
+          if (js.office.note) note = js.office.note;
+        }
 
-  const svgUrl =
-    `https://api.qrserver.com/v1/create-qr-code/?format=svg&size=420x420&data=${encodeURIComponent(u)}&color=000000&bgcolor=FFFFFF`;
+        officeMain.innerHTML = main
+          .replace(" ITE ", "<br />ITE ")
+          .replace(" 14:00", "<br />14:00");
 
-  const pngUrl =
-    `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&data=${encodeURIComponent(u)}&color=000000&bgcolor=FFFFFF`;
+        officeNote.textContent = note || loc || "By appointment when needed";
+        location.textContent = loc || "ITE 461";
+      }
 
-  qr.src = svgUrl;
-  qr.onerror = () => {
-    qr.onerror = null;
-    qr.src = pngUrl;
-  };
-}
+      function applyFromJson(js) {
+        setTheme(js.status || "busy");
+        document.getElementById("status-sub").textContent =
+          `as of ${formatMainUpdatedAt(js.updated_at)}`;
+        setOffice(js);
+        setQR(js.booking_url || DEFAULT_BOOKING_URL);
 
-function formatMainUpdatedAt(s) {
-  if (!s) return "—";
+        if (js.cta) {
+          document.getElementById("cta-text").innerHTML = String(
+            js.cta,
+          ).replace(/<br\s*\/?>/gi, " ");
+        }
 
-  const d = new Date(s);
-  if (Number.isNaN(d.getTime())) return "—";
+        if (js.qr_note) {
+          document.getElementById("qr-note").textContent = js.qr_note;
+        }
 
-  const datePart = d.toLocaleDateString("en-US", {
-    timeZone: "America/New_York",
-    month: "short",
-    day: "numeric"
-  });
+        document.getElementById("updated-at").textContent = formatUpdatedAt(
+          js.updated_at,
+        );
 
-  const timePart = d.toLocaleTimeString("en-US", {
-    timeZone: "America/New_York",
-    hour: "numeric",
-    minute: "2-digit"
-  });
+        if (js.today_note) {
+          document.getElementById("today-main").textContent = js.today_note;
+        }
+      }
 
-  return `${datePart}, ${timePart}`;
-}
+      async function load() {
+        setTheme("busy");
+        setQR(DEFAULT_BOOKING_URL);
 
-function formatUpdatedAt(s) {
-  if (!s) return "—";
-  const d = new Date(s);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString("en-US", {
-    timeZone: "America/New_York",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit"
-  });
-}
+        try {
+          const url = new URL(STATUS_SOURCE);
+          url.searchParams.set("_ts", Date.now());
 
-function setOffice(js) {
-  const officeMain = document.getElementById("office-main");
-  const officeNote = document.getElementById("office-note");
-  const location = document.getElementById("location");
+          const res = await fetch(url.toString(), {
+            cache: "no-store",
+            headers: { Accept: "application/vnd.github+json" },
+          });
 
-  let main = "By appointment";
-  let note = "";
-  let loc = "";
+          if (!res.ok) return;
 
-  if (js.office_hours) {
-    main = String(js.office_hours)
-      .replace(/\s+/g, " ")
-      .replace("Tue/Thu", "Tue / Thu")
-      .replace("14:00-15:00", "14:00–15:00");
-  }
+          const data = await res.json();
+          const file =
+            data.files &&
+            (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
 
-  if (js.office) {
-    if (js.office.line1) main = js.office.line1;
-    if (js.office.line2) loc = js.office.line2;
-    if (js.office.note) note = js.office.note;
-  }
+          if (!file || !file.content) return;
 
-  officeMain.innerHTML = main
-    .replace(" ITE ", "<br />ITE ")
-    .replace(" 14:00", "<br />14:00");
+          const clean = stripJsonComments(file.content);
+          const js = JSON.parse(clean);
+          applyFromJson(js);
+        } catch (e) {
+          console.error("Status load error:", e);
+        }
+      }
 
-  officeNote.textContent = note || loc || "By appointment when needed";
-  location.textContent = loc || "ITE 461";
-}
-
-function applyFromJson(js) {
-  setTheme(js.status || "in");
-  document.getElementById("status-sub").textContent =
-  `as of ${formatMainUpdatedAt(js.updated_at)}`;
-  setOffice(js);
-  setQR(js.booking_url || DEFAULT_BOOKING_URL);
-
-  if (js.cta) {
-    document.getElementById("cta-text").innerHTML =
-      String(js.cta).replace(/<br\s*\/?>/gi, " ");
-  }
-
-  if (js.qr_note) {
-    document.getElementById("qr-note").textContent = js.qr_note;
-  }
-
-  document.getElementById("updated-at").textContent =
-    formatUpdatedAt(js.updated_at);
-
-  if (js.today_note) {
-    document.getElementById("today-main").textContent = js.today_note;
-  }
-}
-
-async function load() {
-  setTheme("in");
-  setQR(DEFAULT_BOOKING_URL);
-
-  try {
-    const url = new URL(STATUS_SOURCE);
-    url.searchParams.set("_ts", Date.now());
-
-    const res = await fetch(url.toString(), {
-      cache: "no-store",
-      headers: { Accept: "application/vnd.github+json" }
-    });
-
-    if (!res.ok) return;
-
-    const data = await res.json();
-    const file =
-      data.files &&
-      (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
-
-    if (!file || !file.content) return;
-
-    const clean = stripJsonComments(file.content);
-    const js = JSON.parse(clean);
-    applyFromJson(js);
-  } catch (e) {
-    console.error("Status load error:", e);
-  }
-}
-
-load();
-</script>
-</body>
+      load();
+    </script>
+  </body>
 </html>
