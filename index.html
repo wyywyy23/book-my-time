@@ -10,6 +10,11 @@
       rel="stylesheet"
     />
 
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+
     <style>
       :root {
         --w: 1872;
@@ -221,6 +226,43 @@
         color: var(--muted);
       }
 
+      .office-list {
+        display: grid;
+        gap: 16px;
+      }
+
+      .office-row {
+        display: grid;
+        grid-template-columns: 34px 1fr;
+        align-items: center;
+        column-gap: 16px;
+        font-size: 36px;
+        line-height: 1.12;
+        font-weight: 800;
+        letter-spacing: -0.035em;
+      }
+
+      .office-row i {
+        font-size: 27px;
+        color: rgba(0, 0, 0, 0.58);
+        text-align: center;
+      }
+
+      .office-quote {
+        font-size: 31px;
+        line-height: 1.22;
+        font-weight: 760;
+        letter-spacing: -0.025em;
+      }
+
+      .office-author {
+        margin-top: 18px;
+        font-size: 24px;
+        line-height: 1.25;
+        font-weight: 650;
+        color: var(--muted);
+      }
+
       .qr-img {
         width: 275px;
         height: 275px;
@@ -287,11 +329,25 @@
 
         <aside class="side">
           <section class="card">
-            <h2 class="card-title">Office Hours</h2>
-            <p class="office-main" id="office-main">
-              Tue / Thu<br />14:00–15:00
-            </p>
-            <div class="office-note" id="office-note">ITE 461</div>
+            <h2 class="card-title" id="office-title">Office Hours</h2>
+
+            <div class="office-list" id="office-list">
+              <div class="office-row">
+                <i class="fa-regular fa-calendar"></i>
+                <span id="office-days">Tue / Thu</span>
+              </div>
+              <div class="office-row">
+                <i class="fa-regular fa-clock"></i>
+                <span id="office-time">14:00–15:00</span>
+              </div>
+              <div class="office-row">
+                <i class="fa-solid fa-location-dot"></i>
+                <span id="office-location">ITE 461</span>
+              </div>
+            </div>
+
+            <div class="office-quote" id="office-quote" hidden></div>
+            <div class="office-author" id="office-author" hidden></div>
           </section>
 
           <section class="card qr-card">
@@ -328,7 +384,7 @@
       const GIST_ID = "f96b0e927c21a42d247b626dceae243e";
       const GIST_FILE = "status.json";
       const STATUS_SOURCE = `https://api.github.com/gists/${GIST_ID}`;
-      const ASSET_BASE = "https://wangyy.phd/book-my-time/"
+      const ASSET_BASE = "https://wangyy.phd/book-my-time/";
 
       const STATUS_MAP = {
         busy: {
@@ -489,34 +545,65 @@
         });
       }
 
+      function pickQuote(quotes) {
+        const fallback = [
+          {
+            quote:
+              "Embrace light. Admire it. Love it. But above all, know light.",
+            author: "George Eastman",
+          },
+          {
+            quote: "The first thing you must learn is to see with light.",
+            author: "Ansel Adams",
+          },
+        ];
+
+        const list = Array.isArray(quotes) && quotes.length ? quotes : fallback;
+        return list[Math.floor(Math.random() * list.length)];
+      }
+
       function setOffice(js) {
-        const officeMain = document.getElementById("office-main");
-        const officeNote = document.getElementById("office-note");
+        const title = document.getElementById("office-title");
+        const list = document.getElementById("office-list");
+        const quoteBox = document.getElementById("office-quote");
+        const authorBox = document.getElementById("office-author");
+
+        const days = document.getElementById("office-days");
+        const time = document.getElementById("office-time");
+        const officeLocation = document.getElementById("office-location");
         const location = document.getElementById("location");
 
-        let main = "By appointment";
-        let note = "";
-        let loc = "";
+        const oh = js.office_hours || {};
+        const hasOfficeHours =
+          oh &&
+          String(oh.days || "").trim() &&
+          String(oh.time || "").trim() &&
+          String(oh.location || "").trim();
 
-        if (js.office_hours) {
-          main = String(js.office_hours)
-            .replace(/\s+/g, " ")
-            .replace("Tue/Thu", "Tue / Thu")
-            .replace("14:00-15:00", "14:00–15:00");
+        if (hasOfficeHours) {
+          title.textContent = "Office Hours";
+
+          days.textContent = oh.days;
+          time.textContent = oh.time;
+          officeLocation.textContent = oh.location;
+          location.textContent = oh.location;
+
+          list.hidden = false;
+          quoteBox.hidden = true;
+          authorBox.hidden = true;
+          return;
         }
 
-        if (js.office) {
-          if (js.office.line1) main = js.office.line1;
-          if (js.office.line2) loc = js.office.line2;
-          if (js.office.note) note = js.office.note;
-        }
+        const q = pickQuote(js.office_quotes);
 
-        officeMain.innerHTML = main
-          .replace(" ITE ", "<br />ITE ")
-          .replace(" 14:00", "<br />14:00");
+        title.textContent = "On Light";
+        quoteBox.textContent = `“${q.quote}”`;
+        authorBox.textContent = `— ${q.author}`;
+        location.textContent = "ITE 461";
 
-        officeNote.textContent = note || loc || "By appointment when needed";
-        location.textContent = loc || "ITE 461";
+        list.hidden = true;
+        quoteBox.hidden = false;
+        authorBox.hidden = false;
       }
 
       async function applyFromJson(js) {
