@@ -86,45 +86,6 @@
           );
       }
 
-      .abstract-meeting-bg {
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        opacity: 1;
-        background:
-          radial-gradient(
-              circle at 20% 72%,
-              rgba(0, 0, 0, 0.12) 0 2px,
-              transparent 3px
-            )
-            0 0 / 18px 18px,
-          radial-gradient(
-            circle at 30% 70%,
-            transparent 0 78px,
-            rgba(0, 0, 0, 0.08) 79px 82px,
-            transparent 83px
-          ),
-          radial-gradient(
-            circle at 43% 58%,
-            transparent 0 125px,
-            rgba(0, 0, 0, 0.07) 126px 130px,
-            transparent 131px
-          ),
-          radial-gradient(
-            circle at 58% 78%,
-            transparent 0 155px,
-            rgba(0, 0, 0, 0.06) 156px 160px,
-            transparent 161px
-          ),
-          radial-gradient(
-            circle at 75% 36%,
-            transparent 0 95px,
-            rgba(0, 0, 0, 0.05) 96px 99px,
-            transparent 100px
-          ),
-          #f7f7f7;
-      }
-
       .layout {
         position: relative;
         z-index: 2;
@@ -314,7 +275,6 @@
   <body>
     <div class="stage scale">
       <img class="bg" id="theme-bg" src="status-theme-in.png" />
-      <div class="abstract-meeting-bg" id="meeting-bg" hidden></div>
       <div class="bg-fade"></div>
 
       <main class="layout">
@@ -384,8 +344,6 @@
           title: "IN MEETING",
 
           img: "status-theme-meeting.png",
-
-          abstract: true,
         },
       };
 
@@ -456,35 +414,7 @@
 
         document.getElementById("status-text").textContent = s.title;
 
-        const bg = document.getElementById("theme-bg");
-
-        const meetingBg = document.getElementById("meeting-bg");
-
-        if (s.abstract) {
-          bg.hidden = true;
-
-          meetingBg.hidden = false;
-
-          bg.src = s.img;
-
-          bg.onload = () => {
-            bg.hidden = false;
-
-            meetingBg.hidden = true;
-          };
-
-          bg.onerror = () => {
-            bg.hidden = true;
-
-            meetingBg.hidden = false;
-          };
-        } else {
-          meetingBg.hidden = true;
-
-          bg.hidden = false;
-
-          bg.src = s.img;
-        }
+        document.getElementById("theme-bg").src = s.img;
       }
 
       function setQR(url) {
