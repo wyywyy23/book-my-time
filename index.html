@@ -93,6 +93,8 @@
         height: 100%;
         display: grid;
         grid-template-columns: 1fr 560px;
+
+        visibility: hidden;
       }
 
       .hero {
@@ -274,7 +276,7 @@
 
   <body>
     <div class="stage scale">
-      <img class="bg" id="theme-bg" src="status-theme-in.png" />
+      <img class="bg" id="theme-bg" />
       <div class="bg-fade"></div>
 
       <main class="layout">
@@ -347,6 +349,14 @@
         },
       };
 
+      function refreshGlass() {
+        document.querySelectorAll(".card").forEach((card) => {
+          card.style.transform = "translateZ(0)";
+          void card.offsetHeight;
+          card.style.transform = "";
+        });
+      }
+
       function stripJsonComments(input) {
         let out = "",
           inStr = false,
@@ -414,7 +424,13 @@
 
         document.getElementById("status-text").textContent = s.title;
 
-        document.getElementById("theme-bg").src = s.img;
+        const bg = document.getElementById("theme-bg");
+
+        bg.onload = () => {
+          refreshGlass();
+        };
+
+        bg.src = s.img;
       }
 
       function setQR(url) {
@@ -523,7 +539,6 @@
       }
 
       async function load() {
-        setTheme("busy");
         setQR(DEFAULT_BOOKING_URL);
 
         try {
@@ -535,20 +550,31 @@
             headers: { Accept: "application/vnd.github+json" },
           });
 
-          if (!res.ok) return;
+          if (!res.ok) {
+            document.querySelector(".layout").style.visibility = "visible";
+            return;
+          }
 
           const data = await res.json();
           const file =
             data.files &&
             (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
 
-          if (!file || !file.content) return;
+          if (!file || !file.content) {
+            document.querySelector(".layout").style.visibility = "visible";
+            return;
+          }
 
           const clean = stripJsonComments(file.content);
           const js = JSON.parse(clean);
           applyFromJson(js);
+          requestAnimationFrame(() => {
+            document.querySelector(".layout").style.visibility = "visible";
+          });
         } catch (e) {
           console.error("Status load error:", e);
+
+          document.querySelector(".layout").style.visibility = "visible";
         }
       }
 
