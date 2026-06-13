@@ -263,10 +263,6 @@
         color: var(--muted);
       }
 
-      #office-title:empty {
-        display: none;
-      }
-
       .qr-img {
         width: 275px;
         height: 275px;
@@ -336,6 +332,19 @@
             <h2 class="card-title" id="office-title">Office Hours</h2>
 
             <div class="office-list" id="office-list" hidden>
+              <div class="office-row">
+                <i class="fa-regular fa-calendar"></i>
+                <span id="office-days"></span>
+              </div>
+              <div class="office-row">
+                <i class="fa-regular fa-clock"></i>
+                <span id="office-time"></span>
+              </div>
+              <div class="office-row">
+                <i class="fa-solid fa-location-dot"></i>
+                <span id="office-location"></span>
+              </div>
+            </div>
 
             <div class="office-quote" id="office-quote" hidden></div>
             <div class="office-author" id="office-author" hidden></div>
