@@ -263,6 +263,10 @@
         color: var(--muted);
       }
 
+      #office-title:empty {
+        display: none;
+      }
+
       .qr-img {
         width: 275px;
         height: 275px;
@@ -331,20 +335,7 @@
           <section class="card">
             <h2 class="card-title" id="office-title">Office Hours</h2>
 
-            <div class="office-list" id="office-list">
-              <div class="office-row">
-                <i class="fa-regular fa-calendar"></i>
-                <span id="office-days">Tue / Thu</span>
-              </div>
-              <div class="office-row">
-                <i class="fa-regular fa-clock"></i>
-                <span id="office-time">14:00–15:00</span>
-              </div>
-              <div class="office-row">
-                <i class="fa-solid fa-location-dot"></i>
-                <span id="office-location">ITE 461</span>
-              </div>
-            </div>
+            <div class="office-list" id="office-list" hidden>
 
             <div class="office-quote" id="office-quote" hidden></div>
             <div class="office-author" id="office-author" hidden></div>
@@ -379,7 +370,7 @@
 
     <script>
       const DEFAULT_BOOKING_URL =
-        "https://app.reclaim.ai/m/yuyang-wang/quick-meeting";
+        "https://app.reclaim.ai/m/yuyang-wang/flexible-quick-meeting";
 
       const GIST_ID = "f96b0e927c21a42d247b626dceae243e";
       const GIST_FILE = "status.json";
@@ -567,15 +558,17 @@
         const list = document.getElementById("office-list");
         const quoteBox = document.getElementById("office-quote");
         const authorBox = document.getElementById("office-author");
+        const location = document.getElementById("location");
 
         const days = document.getElementById("office-days");
         const time = document.getElementById("office-time");
         const officeLocation = document.getElementById("office-location");
-        const location = document.getElementById("location");
 
-        const oh = js.office_hours || {};
+        const oh = js.office_hours;
+
         const hasOfficeHours =
           oh &&
+          typeof oh === "object" &&
           String(oh.days || "").trim() &&
           String(oh.time || "").trim() &&
           String(oh.location || "").trim();
@@ -596,7 +589,7 @@
 
         const q = pickQuote(js.office_quotes);
 
-        title.textContent = "On Light";
+        title.textContent = "";
         quoteBox.textContent = `“${q.quote}”`;
         authorBox.textContent = `— ${q.author}`;
         location.textContent = "ITE 461";
