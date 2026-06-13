@@ -474,6 +474,24 @@ function setQR(url) {
   };
 }
 
+function formatMainUpdatedAt(s) {
+  if (!s) return "—";
+
+  const d = new Date(s);
+
+  const datePart = d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric"
+  });
+
+  const timePart = d.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit"
+  });
+
+  return `${datePart}, ${timePart}`;
+}
+
 function formatUpdatedAt(s) {
   if (!s) return "—";
   const d = new Date(s);
@@ -538,19 +556,6 @@ function applyFromJson(js) {
   if (js.today_note) {
     document.getElementById("today-main").textContent = js.today_note;
   }
-}
-
-function formatMainUpdatedAt(s) {
-  if (!s) return "—";
-  const d = new Date(s);
-  if (Number.isNaN(d.getTime())) return "—";
-
-  return d.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit"
-  });
 }
 
 async function load() {
