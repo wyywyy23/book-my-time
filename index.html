@@ -569,10 +569,6 @@
         const authorBox = document.getElementById("office-author");
         const location = document.getElementById("location");
 
-        const days = document.getElementById("office-days");
-        const time = document.getElementById("office-time");
-        const officeLocation = document.getElementById("office-location");
-
         const oh = js.office_hours;
 
         const hasOfficeHours =
@@ -585,9 +581,21 @@
         if (hasOfficeHours) {
           title.textContent = "Office Hours";
 
-          days.textContent = oh.days;
-          time.textContent = oh.time;
-          officeLocation.textContent = oh.location;
+          list.innerHTML = `
+      <div class="office-row">
+        <i class="fa-regular fa-calendar"></i>
+        <span>${oh.days}</span>
+      </div>
+      <div class="office-row">
+        <i class="fa-regular fa-clock"></i>
+        <span>${oh.time}</span>
+      </div>
+      <div class="office-row">
+        <i class="fa-solid fa-location-dot"></i>
+        <span>${oh.location}</span>
+      </div>
+    `;
+
           location.textContent = oh.location;
 
           list.hidden = false;
@@ -599,12 +607,16 @@
         const q = pickQuote(js.office_quotes);
 
         title.textContent = "Photon of the Day";
+
+        list.innerHTML = "";
+        list.hidden = true;
+
         quoteBox.textContent = `“${q.quote}”`;
         authorBox.textContent = `— ${q.author}`;
 
-        list.hidden = true;
         quoteBox.hidden = false;
         authorBox.hidden = false;
+        location.textContent = "ITE 461";
       }
 
       async function applyFromJson(js) {
