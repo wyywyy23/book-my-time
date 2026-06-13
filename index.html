@@ -287,7 +287,7 @@ body {
   <main class="layout">
     <section class="hero">
       <h1 class="status" id="status-text">IN OFFICE</h1>
-      <p class="sub" id="status-sub">Available today.</p>
+      <p class="sub" id="status-sub">Status updated —</p>
     </section>
 
     <aside class="side">
@@ -434,7 +434,6 @@ function setTheme(statusKey) {
   const s = STATUS_MAP[key] || STATUS_MAP["in"];
 
   document.getElementById("status-text").textContent = s.title;
-  document.getElementById("status-sub").textContent = s.sub;
 
   const bg = document.getElementById("theme-bg");
   const meetingBg = document.getElementById("meeting-bg");
@@ -519,6 +518,8 @@ function setOffice(js) {
 
 function applyFromJson(js) {
   setTheme(js.status || "in");
+  document.getElementById("status-sub").textContent =
+  `Status updated ${formatMainUpdatedAt(js.updated_at)}`;
   setOffice(js);
   setQR(js.booking_url || DEFAULT_BOOKING_URL);
 
@@ -537,6 +538,19 @@ function applyFromJson(js) {
   if (js.today_note) {
     document.getElementById("today-main").textContent = js.today_note;
   }
+}
+
+function formatMainUpdatedAt(s) {
+  if (!s) return "—";
+  const d = new Date(s);
+  if (Number.isNaN(d.getTime())) return "—";
+
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  });
 }
 
 async function load() {
