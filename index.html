@@ -287,7 +287,7 @@ body {
   <main class="layout">
     <section class="hero">
       <h1 class="status" id="status-text">IN OFFICE</h1>
-      <p class="sub" id="status-sub">Status updated —</p>
+      <p class="sub" id="status-sub">as of -</p>
     </section>
 
     <aside class="side">
@@ -519,7 +519,7 @@ function setOffice(js) {
 function applyFromJson(js) {
   setTheme(js.status || "in");
   document.getElementById("status-sub").textContent =
-  `Status updated ${formatMainUpdatedAt(js.updated_at)}`;
+  `as of ${formatMainUpdatedAt(js.updated_at)}`;
   setOffice(js);
   setQR(js.booking_url || DEFAULT_BOOKING_URL);
 
