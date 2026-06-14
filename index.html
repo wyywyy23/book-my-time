@@ -283,7 +283,8 @@
         height: 275px;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
-        margin: 8px 0 26px;
+        display: block;
+        margin: 8px auto 26px;
         background: rgba(255, 255, 255, 0.94);
         border-radius: 22px;
         padding: 16px;
@@ -295,16 +296,10 @@
       .qr-copy {
         font-size: 34px;
         line-height: 1.12;
-        font-weight: 800;
+        font-weight: 820;
         letter-spacing: -0.035em;
-      }
-
-      .qr-sub {
-        margin-top: 10px;
-        font-size: 24px;
-        line-height: 1.25;
-        color: var(--muted);
-        font-weight: 620;
+        color: rgba(0, 0, 0, 0.62);
+        white-space: nowrap;
       }
 
       .today-main {
@@ -365,8 +360,7 @@
           <section class="card qr-card">
             <h2 class="card-title">Book a Time</h2>
             <img class="qr-img" id="qr" alt="Booking QR" />
-            <div class="qr-copy" id="cta-text">Schedule a meeting</div>
-            <div class="qr-sub" id="qr-note">Scan to open booking page</div>
+            <div class="qr-copy" id="cta-text">Book my time</div>
           </section>
 
           <section class="card">
