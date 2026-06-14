@@ -294,12 +294,23 @@
       }
 
       .qr-copy {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+
         font-size: 34px;
         line-height: 1.12;
         font-weight: 820;
         letter-spacing: -0.035em;
         color: rgba(0, 0, 0, 0.62);
         white-space: nowrap;
+        text-align: center;
+      }
+
+      .qr-copy i {
+        font-size: 28px;
+        color: rgba(0, 0, 0, 0.46);
       }
 
       .today-main {
@@ -360,7 +371,10 @@
           <section class="card qr-card">
             <h2 class="card-title">Book a Time</h2>
             <img class="qr-img" id="qr" alt="Booking QR" />
-            <div class="qr-copy" id="cta-text">Book my time</div>
+            <div class="qr-copy" id="cta-text">
+              <i class="fa-solid fa-qrcode"></i>
+              <span>Booking page</span>
+            </div>
           </section>
 
           <section class="card">
@@ -646,8 +660,11 @@
         setIdentityQuote(js);
         setQR(js.booking_url || DEFAULT_BOOKING_URL);
 
-        document.getElementById("cta-text").textContent = "Book my time";
-        
+        document.getElementById("cta-text").innerHTML = `
+  <i class="fa-solid fa-qrcode"></i>
+  <span>Booking page</span>
+`;
+
         document.getElementById("updated-at").textContent = formatUpdatedAt(
           js.updated_at,
         );
@@ -666,6 +683,10 @@
         setQR(DEFAULT_BOOKING_URL);
         setOffice({});
         setIdentityQuote({});
+        document.getElementById("cta-text").innerHTML = `
+  <i class="fa-solid fa-qrcode"></i>
+  <span>Booking page</span>
+`;
 
         try {
           const url = new URL(STATUS_SOURCE);
