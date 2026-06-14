@@ -308,11 +308,6 @@
         text-align: center;
       }
 
-      .qr-copy i {
-        font-size: 28px;
-        color: rgba(0, 0, 0, 0.46);
-      }
-
       .today-main {
         font-size: 30px;
         line-height: 1.24;
@@ -371,10 +366,7 @@
           <section class="card qr-card">
             <h2 class="card-title">Book a Time</h2>
             <img class="qr-img" id="qr" alt="Booking QR" />
-            <div class="qr-copy" id="cta-text">
-              <i class="fa-solid fa-qrcode"></i>
-              <span>Booking page</span>
-            </div>
+            <div class="qr-copy" id="cta-text">Scan to schedule</div>
           </section>
 
           <section class="card">
@@ -650,6 +642,10 @@
         authorBox.textContent = author ? `— ${author}` : "";
       }
 
+      function setFixedCTA() {
+        document.getElementById("cta-text").textContent = "Scan to schedule";
+      }
+
       async function applyFromJson(js) {
         await setTheme(js.status || "busy");
 
@@ -660,10 +656,7 @@
         setIdentityQuote(js);
         setQR(js.booking_url || DEFAULT_BOOKING_URL);
 
-        document.getElementById("cta-text").innerHTML = `
-  <i class="fa-solid fa-qrcode"></i>
-  <span>Booking page</span>
-`;
+        setFixedCTA();
 
         document.getElementById("updated-at").textContent = formatUpdatedAt(
           js.updated_at,
@@ -683,10 +676,7 @@
         setQR(DEFAULT_BOOKING_URL);
         setOffice({});
         setIdentityQuote({});
-        document.getElementById("cta-text").innerHTML = `
-  <i class="fa-solid fa-qrcode"></i>
-  <span>Booking page</span>
-`;
+        setFixedCTA();
 
         try {
           const url = new URL(STATUS_SOURCE);
