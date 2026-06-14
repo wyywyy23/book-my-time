@@ -367,7 +367,6 @@
                 <span id="office-location"></span>
               </div>
             </div>
-
           </section>
 
           <section class="card qr-card">
@@ -597,9 +596,6 @@
 
         title.textContent = "Office Hours";
 
-        quoteBox.hidden = true;
-        authorBox.hidden = true;
-
         if (hasOfficeHours) {
           list.innerHTML = `
       <div class="office-row">
@@ -690,6 +686,8 @@
 
       async function load() {
         setQR(DEFAULT_BOOKING_URL);
+        setOffice({});
+        setIdentityQuote({});
 
         try {
           const url = new URL(STATUS_SOURCE);
