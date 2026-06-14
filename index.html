@@ -308,26 +308,18 @@
         text-align: center;
       }
 
-      .today-main {
-        font-size: 30px;
-        line-height: 1.24;
-        font-weight: 760;
-        margin: 0 0 22px;
-        letter-spacing: -0.025em;
-      }
-
-      .today-meta {
+      .today-lines {
         display: grid;
-        gap: 12px;
-        font-size: 25px;
-        line-height: 1.25;
-        font-weight: 620;
-        color: var(--muted);
+        gap: 18px;
+        margin: 0 0 24px;
       }
 
-      .today-meta span {
-        color: var(--ink);
-        font-weight: 780;
+      .today-line {
+        font-size: 30px;
+        line-height: 1.22;
+        font-weight: 760;
+        letter-spacing: -0.025em;
+        color: rgba(0, 0, 0, 0.72);
       }
     </style>
   </head>
@@ -371,12 +363,9 @@
 
           <section class="card">
             <h2 class="card-title">Today</h2>
-            <p class="today-main" id="today-main">
-              Thinking about photonic chiplet interconnects.
-            </p>
-            <div class="today-meta">
-              <div>Updated: <span id="updated-at">—</span></div>
-              <div>Location: <span id="location">ITE 461</span></div>
+            <div class="today-lines">
+              <div class="today-line" id="today-pollen">Pollen: —</div>
+              <div class="today-line" id="today-moon">Moon: —</div>
             </div>
           </section>
         </aside>
@@ -662,9 +651,7 @@
           js.updated_at,
         );
 
-        if (js.today_note) {
-          document.getElementById("today-main").textContent = js.today_note;
-        }
+        setToday(js);
 
         await new Promise(requestAnimationFrame);
         refreshGlass();
@@ -672,11 +659,24 @@
         document.querySelector(".layout").style.visibility = "visible";
       }
 
+      function setToday(js) {
+        const pollenBox = document.getElementById("today-pollen");
+        const moonBox = document.getElementById("today-moon");
+
+        const pollen = js.pollen || {};
+        const moon = js.moon || {};
+
+        pollenBox.textContent = pollen.summary || "Pollen: —";
+
+        moonBox.textContent = moon.summary || "Moon: —";
+      }
+
       async function load() {
         setQR(DEFAULT_BOOKING_URL);
         setOffice({});
         setIdentityQuote({});
         setFixedCTA();
+        setToday({});
 
         try {
           const url = new URL(STATUS_SOURCE);
