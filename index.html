@@ -131,17 +131,24 @@
         left: 110px;
         bottom: 76px;
         z-index: 3;
-        font-size: 25px;
-        line-height: 1.32;
-        font-weight: 650;
+        max-width: 760px;
         color: rgba(0, 0, 0, 0.62);
       }
 
-      .identity strong {
-        display: block;
-        font-size: 30px;
-        color: rgba(0, 0, 0, 0.82);
-        margin-bottom: 4px;
+      .identity-quote {
+        font-size: 28px;
+        line-height: 1.28;
+        font-weight: 720;
+        letter-spacing: -0.025em;
+        color: rgba(0, 0, 0, 0.68);
+      }
+
+      .identity-author {
+        margin-top: 12px;
+        font-size: 23px;
+        line-height: 1.25;
+        font-weight: 650;
+        color: rgba(0, 0, 0, 0.52);
       }
 
       .side {
@@ -248,19 +255,34 @@
         text-align: center;
       }
 
-      .office-quote {
-        font-size: 31px;
-        line-height: 1.22;
-        font-weight: 760;
-        letter-spacing: -0.025em;
+      .office-empty {
+        height: 100%;
+        min-height: 145px;
+        display: grid;
+        place-items: center;
+        text-align: center;
       }
 
-      .office-author {
-        margin-top: 18px;
-        font-size: 24px;
-        line-height: 1.25;
-        font-weight: 650;
-        color: var(--muted);
+      .office-empty i {
+        font-size: 86px;
+        color: rgba(0, 0, 0, 0.28);
+        margin-bottom: 18px;
+      }
+
+      .office-empty-main {
+        font-size: 34px;
+        line-height: 1.12;
+        font-weight: 820;
+        letter-spacing: -0.035em;
+        color: rgba(0, 0, 0, 0.62);
+      }
+
+      .office-empty-sub {
+        margin-top: 8px;
+        font-size: 22px;
+        line-height: 1.22;
+        font-weight: 620;
+        color: rgba(0, 0, 0, 0.44);
       }
 
       .qr-img {
@@ -346,8 +368,6 @@
               </div>
             </div>
 
-            <div class="office-quote" id="office-quote" hidden></div>
-            <div class="office-author" id="office-author" hidden></div>
           </section>
 
           <section class="card qr-card">
@@ -369,10 +389,9 @@
           </section>
         </aside>
 
-        <div class="identity">
-          <strong>Yuyang Wang</strong>
-          Electrical &amp; Computer Engineering<br />
-          University of Connecticut
+        <div class="identity quote-identity">
+          <div class="identity-quote" id="identity-quote"></div>
+          <div class="identity-author" id="identity-author"></div>
         </div>
       </main>
     </div>
@@ -565,8 +584,6 @@
       function setOffice(js) {
         const title = document.getElementById("office-title");
         const list = document.getElementById("office-list");
-        const quoteBox = document.getElementById("office-quote");
-        const authorBox = document.getElementById("office-author");
         const location = document.getElementById("location");
 
         const oh = js.office_hours;
@@ -578,9 +595,12 @@
           String(oh.time || "").trim() &&
           String(oh.location || "").trim();
 
-        if (hasOfficeHours) {
-          title.textContent = "Office Hours";
+        title.textContent = "Office Hours";
 
+        quoteBox.hidden = true;
+        authorBox.hidden = true;
+
+        if (hasOfficeHours) {
           list.innerHTML = `
       <div class="office-row">
         <i class="fa-regular fa-calendar"></i>
@@ -597,26 +617,41 @@
     `;
 
           location.textContent = oh.location;
-
           list.hidden = false;
-          quoteBox.hidden = true;
-          authorBox.hidden = true;
           return;
         }
 
-        const q = pickQuote(js.office_quotes);
+        list.innerHTML = `
+    <div class="office-empty">
+      <div>
+        <i class="fa-solid fa-mug-saucer"></i>
+        <div class="office-empty-main">By appointment</div>
+        <div class="office-empty-sub">Please scan to book a time</div>
+      </div>
+    </div>
+  `;
 
-        title.textContent = "Photon of the Day";
-
-        list.innerHTML = "";
-        list.hidden = true;
-
-        quoteBox.textContent = `“${q.quote}”`;
-        authorBox.textContent = `— ${q.author}`;
-
-        quoteBox.hidden = false;
-        authorBox.hidden = false;
         location.textContent = "ITE 461";
+        list.hidden = false;
+      }
+
+      function setIdentityQuote(js) {
+        const quoteBox = document.getElementById("identity-quote");
+        const authorBox = document.getElementById("identity-author");
+
+        const q = pickQuote(js.office_quotes || js.quotes);
+
+        if (!q) {
+          quoteBox.textContent = "";
+          authorBox.textContent = "";
+          return;
+        }
+
+        const text = q.quote || q.text || "";
+        const author = q.author || "";
+
+        quoteBox.textContent = text ? `“${text}”` : "";
+        authorBox.textContent = author ? `— ${author}` : "";
       }
 
       async function applyFromJson(js) {
@@ -626,6 +661,7 @@
           `as of ${formatMainUpdatedAt(js.updated_at)}`;
 
         setOffice(js);
+        setIdentityQuote(js);
         setQR(js.booking_url || DEFAULT_BOOKING_URL);
 
         if (js.cta) {
