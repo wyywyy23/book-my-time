@@ -131,7 +131,7 @@
         left: 110px;
         bottom: 76px;
         z-index: 3;
-        max-width: 760px;
+        max-width: 980px;
         color: rgba(0, 0, 0, 0.62);
       }
 
@@ -275,14 +275,6 @@
         font-weight: 820;
         letter-spacing: -0.035em;
         color: rgba(0, 0, 0, 0.62);
-      }
-
-      .office-empty-sub {
-        margin-top: 8px;
-        font-size: 22px;
-        line-height: 1.22;
-        font-weight: 620;
-        color: rgba(0, 0, 0, 0.44);
       }
 
       .qr-img {
@@ -618,14 +610,13 @@
         }
 
         list.innerHTML = `
-    <div class="office-empty">
-      <div>
-        <i class="fa-solid fa-mug-saucer"></i>
-        <div class="office-empty-main">By appointment</div>
-        <div class="office-empty-sub">Please scan to book a time</div>
-      </div>
+  <div class="office-empty">
+    <div>
+      <i class="fa-solid fa-mug-saucer"></i>
+      <div class="office-empty-main">By appointment</div>
     </div>
-  `;
+  </div>
+`;
 
         location.textContent = "ITE 461";
         list.hidden = false;
