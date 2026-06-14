@@ -315,11 +315,29 @@
       }
 
       .today-line {
-        font-size: 30px;
+        display: grid;
+        grid-template-columns: 34px 1fr;
+        align-items: start;
+        column-gap: 14px;
+
+        font-size: 28px;
         line-height: 1.22;
-        font-weight: 760;
+        font-weight: 700;
         letter-spacing: -0.025em;
-        color: rgba(0, 0, 0, 0.72);
+        color: rgba(0, 0, 0, 0.66);
+      }
+
+      .today-line i {
+        font-size: 25px;
+        line-height: 1.2;
+        color: rgba(0, 0, 0, 0.44);
+        text-align: center;
+        margin-top: 3px;
+      }
+
+      .today-line strong {
+        font-weight: 820;
+        color: rgba(0, 0, 0, 0.78);
       }
     </style>
   </head>
@@ -363,9 +381,26 @@
 
           <section class="card">
             <h2 class="card-title">Today</h2>
+
             <div class="today-lines">
-              <div class="today-line" id="today-pollen">Pollen: —</div>
-              <div class="today-line" id="today-moon">Moon: —</div>
+              <div class="today-line">
+                <i class="fa-solid fa-seedling"></i>
+                <span>
+                  Tree <strong id="pollen-tree">—</strong> · Grass
+                  <strong id="pollen-grass">—</strong> · Weed
+                  <strong id="pollen-weed">—</strong>
+                </span>
+              </div>
+
+              <div class="today-line">
+                <i class="fa-regular fa-moon"></i>
+                <span>
+                  <strong id="moon-phase">—</strong>
+                  · <strong id="moon-illumination">—</strong> · ↑
+                  <strong id="moonrise">—</strong> · ↓
+                  <strong id="moonset">—</strong>
+                </span>
+              </div>
             </div>
           </section>
         </aside>
@@ -476,23 +511,26 @@
         const key = String(statusKey || "busy")
           .trim()
           .toLowerCase();
+
         const s = STATUS_MAP[key] || STATUS_MAP.busy;
 
         document.getElementById("status-text").textContent = s.title;
 
         const bg = document.getElementById("theme-bg");
-
         bg.src = s.img;
 
         try {
-          await bg.decode();
+          if (bg.decode) {
+            await Promise.race([
+              bg.decode(),
+              new Promise((resolve) => setTimeout(resolve, 800)),
+            ]);
+          }
         } catch (e) {
           // ignore decode errors
         }
 
         await new Promise(requestAnimationFrame);
-        await new Promise(requestAnimationFrame);
-
         refreshGlass();
       }
 
@@ -565,8 +603,6 @@
       function setOffice(js) {
         const title = document.getElementById("office-title");
         const list = document.getElementById("office-list");
-        const location = document.getElementById("location");
-
         const oh = js.office_hours;
 
         const hasOfficeHours =
@@ -594,7 +630,6 @@
       </div>
     `;
 
-          location.textContent = oh.location;
           list.hidden = false;
           return;
         }
@@ -608,7 +643,6 @@
   </div>
 `;
 
-        location.textContent = "ITE 461";
         list.hidden = false;
       }
 
@@ -631,6 +665,45 @@
         authorBox.textContent = author ? `— ${author}` : "";
       }
 
+      function formatPollenLevel(v) {
+        if (v === null || v === undefined || v === "") return "—";
+
+        const n = Number(v);
+        if (Number.isNaN(n)) return String(v);
+
+        if (n <= 0) return "0";
+        if (n <= 1) return "1";
+        if (n <= 2) return "2";
+        if (n <= 3) return "3";
+        if (n <= 4) return "4";
+        return "5";
+      }
+
+      function setToday(js) {
+        const pollen = js.pollen || {};
+        const moon = js.moon || {};
+
+        document.getElementById("pollen-tree").textContent = formatPollenLevel(
+          pollen.tree,
+        );
+        document.getElementById("pollen-grass").textContent = formatPollenLevel(
+          pollen.grass,
+        );
+        document.getElementById("pollen-weed").textContent = formatPollenLevel(
+          pollen.weed,
+        );
+
+        document.getElementById("moon-phase").textContent = moon.phase || "—";
+
+        document.getElementById("moon-illumination").textContent =
+          moon.illumination !== undefined && moon.illumination !== null
+            ? `${moon.illumination}%`
+            : "—";
+
+        document.getElementById("moonrise").textContent = moon.moonrise || "—";
+        document.getElementById("moonset").textContent = moon.moonset || "—";
+      }
+
       function setFixedCTA() {
         document.getElementById("cta-text").textContent = "Scan to schedule";
       }
@@ -647,28 +720,12 @@
 
         setFixedCTA();
 
-        document.getElementById("updated-at").textContent = formatUpdatedAt(
-          js.updated_at,
-        );
-
         setToday(js);
 
         await new Promise(requestAnimationFrame);
         refreshGlass();
 
         document.querySelector(".layout").style.visibility = "visible";
-      }
-
-      function setToday(js) {
-        const pollenBox = document.getElementById("today-pollen");
-        const moonBox = document.getElementById("today-moon");
-
-        const pollen = js.pollen || {};
-        const moon = js.moon || {};
-
-        pollenBox.textContent = pollen.summary || "Pollen: —";
-
-        moonBox.textContent = moon.summary || "Moon: —";
       }
 
       async function load() {
