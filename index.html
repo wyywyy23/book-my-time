@@ -646,16 +646,8 @@
         setIdentityQuote(js);
         setQR(js.booking_url || DEFAULT_BOOKING_URL);
 
-        if (js.cta) {
-          document.getElementById("cta-text").innerHTML = String(
-            js.cta,
-          ).replace(/<br\s*\/?>/gi, " ");
-        }
-
-        if (js.qr_note) {
-          document.getElementById("qr-note").textContent = js.qr_note;
-        }
-
+        document.getElementById("cta-text").textContent = "Book my time";
+        
         document.getElementById("updated-at").textContent = formatUpdatedAt(
           js.updated_at,
         );
