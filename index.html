@@ -23,8 +23,6 @@
         --ink: #090909;
         --muted: #555;
         --soft: #777;
-
-        --glass-border-lo: rgba(0, 0, 0, 0.08);
       }
 
       html,
@@ -98,7 +96,6 @@
         height: 100%;
         display: grid;
         grid-template-columns: 1fr 560px;
-
         visibility: hidden;
       }
 
@@ -111,7 +108,6 @@
         font-size: 172px;
         line-height: 0.88;
         font-weight: 900;
-        /* letter-spacing: -0.078em; */
         text-transform: uppercase;
         margin: 0 0 34px;
         max-width: 1050px;
@@ -159,7 +155,6 @@
         min-height: 0;
       }
 
-      /* Liquid glass cards */
       .card {
         position: relative;
         background: rgba(255, 255, 255, 0.05);
@@ -205,10 +200,6 @@
         z-index: 1;
       }
 
-      .qr-card {
-        background: rgba(255, 255, 255, 0.05);
-      }
-
       .card-title {
         font-size: 27px;
         font-weight: 860;
@@ -217,25 +208,15 @@
         margin: 0 0 22px;
       }
 
-      .office-main {
-        font-size: 42px;
-        line-height: 1.08;
-        font-weight: 800;
-        letter-spacing: -0.035em;
-        margin: 0;
-      }
-
-      .office-note {
-        margin-top: 18px;
-        font-size: 25px;
-        line-height: 1.26;
-        font-weight: 620;
-        color: var(--muted);
-      }
-
       .office-list {
         display: grid;
         gap: 16px;
+      }
+
+      .office-hours-content {
+        display: grid;
+        gap: 16px;
+        transform: translateY(10px);
       }
 
       .office-row {
@@ -278,6 +259,10 @@
         color: rgba(0, 0, 0, 0.62);
       }
 
+      .qr-card {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
       .qr-img {
         width: 275px;
         height: 275px;
@@ -297,8 +282,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 12px;
-
         font-size: 34px;
         line-height: 1.12;
         font-weight: 820;
@@ -311,7 +294,7 @@
       .today-lines {
         display: grid;
         gap: 18px;
-        margin: 0 0 24px;
+        margin: 0;
       }
 
       .today-line {
@@ -319,7 +302,6 @@
         grid-template-columns: 34px 1fr;
         align-items: start;
         column-gap: 14px;
-
         font-size: 28px;
         line-height: 1.22;
         font-weight: 700;
@@ -344,13 +326,13 @@
 
   <body>
     <div class="stage scale">
-      <img class="bg" id="theme-bg" />
+      <img class="bg" id="theme-bg" alt="" />
       <div class="bg-fade"></div>
 
       <main class="layout">
         <section class="hero">
           <h1 class="status" id="status-text">IN OFFICE</h1>
-          <p class="sub" id="status-sub">as of -</p>
+          <p class="sub" id="status-sub">as of —</p>
         </section>
 
         <aside class="side">
@@ -424,19 +406,14 @@
       const STATUS_MAP = {
         busy: {
           title: "IN OFFICE",
-
           img: `${ASSET_BASE}status-theme-in.png`,
         },
-
         ooo: {
           title: "OUT OF OFFICE",
-
           img: `${ASSET_BASE}status-theme-out.png`,
         },
-
         "in-meeting": {
           title: "IN MEETING",
-
           img: `${ASSET_BASE}status-theme-meeting.png`,
         },
       };
@@ -444,21 +421,29 @@
       function refreshGlass() {
         document.querySelectorAll(".card").forEach((card) => {
           card.style.transform = "translateZ(0)";
+          card.style.backdropFilter = "blur(8.1px) contrast(1.08)";
+          card.style.webkitBackdropFilter = "blur(8.1px) contrast(1.08)";
+
           void card.offsetHeight;
+
           card.style.transform = "";
+          card.style.backdropFilter = "blur(8px) contrast(1.08)";
+          card.style.webkitBackdropFilter = "blur(8px) contrast(1.08)";
         });
       }
 
       function stripJsonComments(input) {
-        let out = "",
-          inStr = false,
-          esc = false,
-          inBlk = false,
-          inLine = false,
-          quote = "";
+        let out = "";
+        let inStr = false;
+        let esc = false;
+        let inBlk = false;
+        let inLine = false;
+        let quote = "";
+
         for (let i = 0; i < input.length; i++) {
-          const c = input[i],
-            n = input[i + 1];
+          const c = input[i];
+          const n = input[i + 1];
+
           if (inLine) {
             if (c === "\n") {
               inLine = false;
@@ -466,6 +451,7 @@
             }
             continue;
           }
+
           if (inBlk) {
             if (c === "*" && n === "/") {
               inBlk = false;
@@ -473,41 +459,50 @@
             }
             continue;
           }
+
           if (inStr) {
             out += c;
+
             if (esc) {
               esc = false;
               continue;
             }
+
             if (c === "\\") {
               esc = true;
               continue;
             }
+
             if (c === quote) inStr = false;
             continue;
           }
+
           if (c === "/" && n === "/") {
             inLine = true;
             i++;
             continue;
           }
+
           if (c === "/" && n === "*") {
             inBlk = true;
             i++;
             continue;
           }
+
           if (c === '"' || c === "'") {
             inStr = true;
             quote = c;
             out += c;
             continue;
           }
+
           out += c;
         }
+
         return out;
       }
 
-      async function setTheme(statusKey) {
+      function setTheme(statusKey) {
         const key = String(statusKey || "busy")
           .trim()
           .toLowerCase();
@@ -517,21 +512,20 @@
         document.getElementById("status-text").textContent = s.title;
 
         const bg = document.getElementById("theme-bg");
+
+        const forceRefresh = () => {
+          requestAnimationFrame(() => {
+            refreshGlass();
+            requestAnimationFrame(refreshGlass);
+          });
+        };
+
+        bg.onload = forceRefresh;
+        bg.onerror = forceRefresh;
         bg.src = s.img;
 
-        try {
-          if (bg.decode) {
-            await Promise.race([
-              bg.decode(),
-              new Promise((resolve) => setTimeout(resolve, 800)),
-            ]);
-          }
-        } catch (e) {
-          // ignore decode errors
-        }
-
-        await new Promise(requestAnimationFrame);
-        refreshGlass();
+        setTimeout(forceRefresh, 900);
+        setTimeout(forceRefresh, 1800);
       }
 
       function setQR(url) {
@@ -543,6 +537,7 @@
         const pngUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&data=${encodeURIComponent(u)}&color=000000&bgcolor=FFFFFF`;
 
         qr.src = svgUrl;
+
         qr.onerror = () => {
           qr.onerror = null;
           qr.src = pngUrl;
@@ -568,19 +563,6 @@
         });
 
         return `${datePart}, ${timePart}`;
-      }
-
-      function formatUpdatedAt(s) {
-        if (!s) return "—";
-        const d = new Date(s);
-        if (Number.isNaN(d.getTime())) return "—";
-        return d.toLocaleString("en-US", {
-          timeZone: "America/New_York",
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-        });
       }
 
       function pickQuote(quotes) {
@@ -616,32 +598,34 @@
 
         if (hasOfficeHours) {
           list.innerHTML = `
-      <div class="office-row">
-        <i class="fa-regular fa-calendar"></i>
-        <span>${oh.days}</span>
-      </div>
-      <div class="office-row">
-        <i class="fa-regular fa-clock"></i>
-        <span>${oh.time}</span>
-      </div>
-      <div class="office-row">
-        <i class="fa-solid fa-location-dot"></i>
-        <span>${oh.location}</span>
-      </div>
-    `;
+            <div class="office-hours-content">
+              <div class="office-row">
+                <i class="fa-regular fa-calendar"></i>
+                <span>${oh.days}</span>
+              </div>
+              <div class="office-row">
+                <i class="fa-regular fa-clock"></i>
+                <span>${oh.time}</span>
+              </div>
+              <div class="office-row">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>${oh.location}</span>
+              </div>
+            </div>
+          `;
 
           list.hidden = false;
           return;
         }
 
         list.innerHTML = `
-  <div class="office-empty">
-    <div>
-      <i class="fa-solid fa-mug-saucer"></i>
-      <div class="office-empty-main">By appointment</div>
-    </div>
-  </div>
-`;
+          <div class="office-empty">
+            <div>
+              <i class="fa-solid fa-mug-saucer"></i>
+              <div class="office-empty-main">By appointment</div>
+            </div>
+          </div>
+        `;
 
         list.hidden = false;
       }
@@ -686,9 +670,11 @@
         document.getElementById("pollen-tree").textContent = formatPollenLevel(
           pollen.tree,
         );
+
         document.getElementById("pollen-grass").textContent = formatPollenLevel(
           pollen.grass,
         );
+
         document.getElementById("pollen-weed").textContent = formatPollenLevel(
           pollen.weed,
         );
@@ -708,24 +694,19 @@
         document.getElementById("cta-text").textContent = "Scan to schedule";
       }
 
-      async function applyFromJson(js) {
-        await setTheme(js.status || "busy");
-
+      function applyFromJson(js) {
         document.getElementById("status-sub").textContent =
           `as of ${formatMainUpdatedAt(js.updated_at)}`;
 
         setOffice(js);
         setIdentityQuote(js);
         setQR(js.booking_url || DEFAULT_BOOKING_URL);
-
         setFixedCTA();
-
         setToday(js);
 
-        await new Promise(requestAnimationFrame);
-        refreshGlass();
+        requestAnimationFrame(refreshGlass);
 
-        document.querySelector(".layout").style.visibility = "visible";
+        setTheme(js.status || "busy");
       }
 
       async function load() {
@@ -734,6 +715,10 @@
         setIdentityQuote({});
         setFixedCTA();
         setToday({});
+
+        document.querySelector(".layout").style.visibility = "visible";
+
+        setTheme("busy");
 
         try {
           const url = new URL(STATUS_SOURCE);
@@ -744,28 +729,22 @@
             headers: { Accept: "application/vnd.github+json" },
           });
 
-          if (!res.ok) {
-            document.querySelector(".layout").style.visibility = "visible";
-            return;
-          }
+          if (!res.ok) return;
 
           const data = await res.json();
+
           const file =
             data.files &&
             (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
 
-          if (!file || !file.content) {
-            document.querySelector(".layout").style.visibility = "visible";
-            return;
-          }
+          if (!file || !file.content) return;
 
           const clean = stripJsonComments(file.content);
           const js = JSON.parse(clean);
-          await applyFromJson(js);
+
+          applyFromJson(js);
         } catch (e) {
           console.error("Status load error:", e);
-
-          document.querySelector(".layout").style.visibility = "visible";
         }
       }
 
