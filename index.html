@@ -341,6 +341,45 @@
         font-size: 0.92em;
         color: rgba(0, 0, 0, 0.58);
       }
+
+      .forecast-strip {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        column-gap: 8px;
+        align-items: end;
+      }
+
+      .forecast-hour {
+        display: grid;
+        justify-items: center;
+        gap: 7px;
+        min-width: 0;
+      }
+
+      .forecast-time {
+        font-size: 18px;
+        line-height: 1;
+        font-weight: 860;
+        letter-spacing: -0.035em;
+        color: rgba(0, 0, 0, 0.58);
+        white-space: nowrap;
+      }
+
+      .forecast-icon {
+        font-size: 34px;
+        line-height: 1;
+        color: rgba(0, 0, 0, 0.52);
+        margin-top: 3px;
+      }
+
+      .forecast-temp {
+        font-size: 24px;
+        line-height: 1;
+        font-weight: 820;
+        letter-spacing: -0.045em;
+        color: rgba(0, 0, 0, 0.72);
+      }
     </style>
   </head>
 
@@ -406,6 +445,38 @@
                     <strong id="moonset">—</strong>
                   </span>
                 </span>
+              </div>
+
+              <div
+                class="forecast-strip"
+                id="forecast-strip"
+                aria-label="Next five hours weather"
+              >
+                <div class="forecast-hour">
+                  <div class="forecast-time">Now</div>
+                  <i class="forecast-icon wi wi-cloudy"></i>
+                  <div class="forecast-temp">—°</div>
+                </div>
+                <div class="forecast-hour">
+                  <div class="forecast-time">—</div>
+                  <i class="forecast-icon wi wi-cloudy"></i>
+                  <div class="forecast-temp">—°</div>
+                </div>
+                <div class="forecast-hour">
+                  <div class="forecast-time">—</div>
+                  <i class="forecast-icon wi wi-cloudy"></i>
+                  <div class="forecast-temp">—°</div>
+                </div>
+                <div class="forecast-hour">
+                  <div class="forecast-time">—</div>
+                  <i class="forecast-icon wi wi-cloudy"></i>
+                  <div class="forecast-temp">—°</div>
+                </div>
+                <div class="forecast-hour">
+                  <div class="forecast-time">—</div>
+                  <i class="forecast-icon wi wi-cloudy"></i>
+                  <div class="forecast-temp">—°</div>
+                </div>
               </div>
             </div>
           </section>
@@ -705,6 +776,7 @@
         );
 
         setMoonFallback();
+        setForecastFallback();
       }
 
       function getLocalDateString(date = new Date()) {
@@ -826,6 +898,158 @@
         }
       }
 
+      function weatherIconClassFromCode(code, isDay) {
+        const c = Number(code);
+        const day = Number(isDay) === 1;
+
+        if (c === 1000) {
+          return day ? "wi wi-day-sunny" : "wi wi-night-clear";
+        }
+
+        if (c === 1003) {
+          return day ? "wi wi-day-cloudy" : "wi wi-night-alt-cloudy";
+        }
+
+        if (c === 1006) return "wi wi-cloudy";
+        if (c === 1009) return "wi wi-cloud";
+
+        if (c === 1030 || c === 1135 || c === 1147) return "wi wi-fog";
+
+        if (c === 1063) {
+          return day ? "wi wi-day-showers" : "wi wi-night-alt-showers";
+        }
+
+        if (c === 1066) {
+          return day ? "wi wi-day-snow" : "wi wi-night-alt-snow";
+        }
+
+        if (c === 1069 || c === 1072) {
+          return day ? "wi wi-day-sleet" : "wi wi-night-alt-sleet";
+        }
+
+        if (c === 1087) {
+          return day
+            ? "wi wi-day-thunderstorm"
+            : "wi wi-night-alt-thunderstorm";
+        }
+
+        if (c >= 1150 && c <= 1171) return "wi wi-sprinkle";
+
+        if (c >= 1180 && c <= 1201) {
+          return day ? "wi wi-day-rain" : "wi wi-night-alt-rain";
+        }
+
+        if (c >= 1204 && c <= 1207) return "wi wi-sleet";
+
+        if (c >= 1210 && c <= 1225) {
+          return day ? "wi wi-day-snow" : "wi wi-night-alt-snow";
+        }
+
+        if (c === 1237 || (c >= 1261 && c <= 1264)) return "wi wi-hail";
+
+        if (c >= 1240 && c <= 1246) {
+          return day ? "wi wi-day-showers" : "wi wi-night-alt-showers";
+        }
+
+        if (c >= 1249 && c <= 1252) return "wi wi-sleet";
+
+        if (c >= 1255 && c <= 1258) return "wi wi-snow";
+
+        if (c >= 1273 && c <= 1282) return "wi wi-thunderstorm";
+
+        return "wi wi-cloudy";
+      }
+
+      function formatForecastHourLabel(timeEpoch, index) {
+        if (index === 0) return "Now";
+
+        const d = new Date(timeEpoch * 1000);
+
+        return d
+          .toLocaleTimeString("en-US", {
+            timeZone: "America/New_York",
+            hour: "numeric",
+            hour12: true,
+          })
+          .replace(":00", "")
+          .replace(" ", "");
+      }
+
+      function setForecastFallback() {
+        document.querySelectorAll(".forecast-hour").forEach((el, index) => {
+          const timeBox = el.querySelector(".forecast-time");
+          const iconBox = el.querySelector(".forecast-icon");
+          const tempBox = el.querySelector(".forecast-temp");
+
+          if (timeBox) timeBox.textContent = index === 0 ? "Now" : "—";
+          if (iconBox) iconBox.className = "forecast-icon wi wi-cloudy";
+          if (tempBox) tempBox.textContent = "—°";
+        });
+      }
+
+      function setForecastFromData(data) {
+        const allHours = (data?.forecast?.forecastday || []).flatMap(
+          (day) => day.hour || [],
+        );
+
+        const nowEpoch = Math.floor(Date.now() / 1000);
+
+        const nextHours = allHours
+          .filter((h) => Number(h.time_epoch) >= nowEpoch - 1800)
+          .slice(0, 5);
+
+        if (nextHours.length < 5) {
+          setForecastFallback();
+          return;
+        }
+
+        const slots = document.querySelectorAll(".forecast-hour");
+
+        nextHours.forEach((h, index) => {
+          const slot = slots[index];
+          if (!slot) return;
+
+          const timeBox = slot.querySelector(".forecast-time");
+          const iconBox = slot.querySelector(".forecast-icon");
+          const tempBox = slot.querySelector(".forecast-temp");
+
+          const tempF = Math.round(Number(h.temp_f));
+          const code = h?.condition?.code;
+          const isDay = Number(h.is_day) === 1;
+
+          timeBox.textContent = formatForecastHourLabel(h.time_epoch, index);
+          iconBox.className = `forecast-icon ${weatherIconClassFromCode(code, isDay)}`;
+          tempBox.textContent = Number.isFinite(tempF) ? `${tempF}°` : "—°";
+        });
+      }
+
+      async function loadForecast() {
+        if (!WEATHER_API_KEY || WEATHER_API_KEY === "YOUR_WEATHERAPI_KEY") {
+          setForecastFallback();
+          return;
+        }
+
+        const url =
+          "https://api.weatherapi.com/v1/forecast.json" +
+          `?key=${encodeURIComponent(WEATHER_API_KEY)}` +
+          `&q=${encodeURIComponent(MOON_LOCATION)}` +
+          `&days=2` +
+          `&aqi=no` +
+          `&alerts=no` +
+          `&_ts=${Date.now()}`;
+
+        try {
+          const res = await fetch(url, { cache: "no-store" });
+          if (!res.ok) throw new Error(`Forecast API failed: ${res.status}`);
+
+          const data = await res.json();
+          setForecastFromData(data);
+        } catch (e) {
+          console.error("Forecast load error:", e);
+          setForecastFallback();
+        }
+      }
+
       function setFixedCTA() {
         document.getElementById("cta-text").textContent = "Scan to schedule";
       }
@@ -840,6 +1064,7 @@
         setFixedCTA();
         setToday(js);
         loadMoonAstro();
+        loadForecast();
 
         requestAnimationFrame(refreshGlass);
 
@@ -868,6 +1093,7 @@
 
           if (!res.ok) {
             loadMoonAstro();
+            loadForecast();
             return;
           }
 
@@ -879,6 +1105,7 @@
 
           if (!file || !file.content) {
             loadMoonAstro();
+            loadForecast();
             return;
           }
 
@@ -889,6 +1116,7 @@
         } catch (e) {
           console.error("Status load error:", e);
           loadMoonAstro();
+          loadForecast();
         }
       }
 
