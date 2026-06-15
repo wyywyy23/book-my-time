@@ -1476,7 +1476,11 @@
 
           const res = await fetch(url.toString(), {
             cache: "no-store",
-            headers: { Accept: "application/json" },
+            headers: {
+              Accept: "application/json",
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+            },
           });
 
           if (!res.ok) {
