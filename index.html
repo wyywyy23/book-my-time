@@ -375,7 +375,7 @@
               </div>
 
               <div class="today-line">
-                <i class="fa-regular fa-moon"></i>
+                <i id="moon-icon" class="fa-regular fa-moon"></i>
                 <span>
                   <strong id="moon-phase">—</strong>
                   · <strong id="moon-illumination">—</strong> · ↑
@@ -402,6 +402,8 @@
       const GIST_FILE = "status.json";
       const STATUS_SOURCE = `https://api.github.com/gists/${GIST_ID}`;
       const ASSET_BASE = "https://wangyy.phd/book-my-time/";
+      const WEATHER_API_KEY = "0e752e5637d946889eb05938261506";
+      const MOON_LOCATION = "41.806634541194654,-72.25259166465403";
 
       const STATUS_MAP = {
         busy: {
@@ -665,7 +667,6 @@
 
       function setToday(js) {
         const pollen = js.pollen || {};
-        const moon = js.moon || {};
 
         document.getElementById("pollen-tree").textContent = formatPollenLevel(
           pollen.tree,
@@ -679,15 +680,123 @@
           pollen.weed,
         );
 
-        document.getElementById("moon-phase").textContent = moon.phase || "—";
+        setMoonFallback();
+      }
 
-        document.getElementById("moon-illumination").textContent =
-          moon.illumination !== undefined && moon.illumination !== null
-            ? `${moon.illumination}%`
-            : "—";
+      function getLocalDateString(date = new Date()) {
+        const parts = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "America/New_York",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).formatToParts(date);
 
-        document.getElementById("moonrise").textContent = moon.moonrise || "—";
-        document.getElementById("moonset").textContent = moon.moonset || "—";
+        const yyyy = parts.find((p) => p.type === "year")?.value;
+        const mm = parts.find((p) => p.type === "month")?.value;
+        const dd = parts.find((p) => p.type === "day")?.value;
+
+        return `${yyyy}-${mm}-${dd}`;
+      }
+
+      function normalizeAstroTime(value) {
+        if (!value || typeof value !== "string") return "—";
+
+        const s = value.trim();
+
+        if (
+          !s ||
+          /^no moonrise$/i.test(s) ||
+          /^no moonset$/i.test(s) ||
+          /^null$/i.test(s)
+        ) {
+          return "—";
+        }
+
+        return s.replace(/^0/, "");
+      }
+
+      function normalizeIllumination(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return "—";
+        return `${Math.round(n)}%`;
+      }
+
+      function moonIconClassFromPhase(phase) {
+        const p = String(phase || "").toLowerCase();
+
+        if (p.includes("new")) return "fa-solid fa-circle";
+        if (p.includes("full")) return "fa-regular fa-circle";
+
+        if (p.includes("first quarter"))
+          return "fa-solid fa-circle-half-stroke";
+        if (p.includes("last quarter")) return "fa-solid fa-circle-half-stroke";
+
+        if (p.includes("crescent")) return "fa-regular fa-moon";
+        if (p.includes("gibbous")) return "fa-solid fa-moon";
+
+        return "fa-regular fa-moon";
+      }
+
+      function setMoonFallback() {
+        const moonIcon = document.getElementById("moon-icon");
+
+        if (moonIcon) {
+          moonIcon.className = "fa-regular fa-moon";
+        }
+
+        document.getElementById("moon-phase").textContent = "—";
+        document.getElementById("moon-illumination").textContent = "—";
+        document.getElementById("moonrise").textContent = "—";
+        document.getElementById("moonset").textContent = "—";
+      }
+
+      function setMoonFromAstro(astro) {
+        const phase = astro?.moon_phase || "—";
+        const illumination = normalizeIllumination(astro?.moon_illumination);
+        const moonrise = normalizeAstroTime(astro?.moonrise);
+        const moonset = normalizeAstroTime(astro?.moonset);
+
+        const moonIcon = document.getElementById("moon-icon");
+
+        if (moonIcon) {
+          moonIcon.className = moonIconClassFromPhase(phase);
+        }
+
+        document.getElementById("moon-phase").textContent = phase;
+        document.getElementById("moon-illumination").textContent = illumination;
+        document.getElementById("moonrise").textContent = moonrise;
+        document.getElementById("moonset").textContent = moonset;
+      }
+
+      async function loadMoonAstro() {
+        if (!WEATHER_API_KEY || WEATHER_API_KEY === "YOUR_WEATHERAPI_KEY") {
+          setMoonFallback();
+          return;
+        }
+
+        const date = getLocalDateString();
+
+        const url =
+          "https://api.weatherapi.com/v1/astronomy.json" +
+          `?key=${encodeURIComponent(WEATHER_API_KEY)}` +
+          `&q=${encodeURIComponent(MOON_LOCATION)}` +
+          `&dt=${encodeURIComponent(date)}` +
+          `&_ts=${Date.now()}`;
+
+        try {
+          const res = await fetch(url, { cache: "no-store" });
+          if (!res.ok) throw new Error(`Astronomy API failed: ${res.status}`);
+
+          const data = await res.json();
+          const astro = data?.astronomy?.astro;
+
+          if (!astro) throw new Error("Missing astronomy.astro data");
+
+          setMoonFromAstro(astro);
+        } catch (e) {
+          console.error("Moon astronomy load error:", e);
+          setMoonFallback();
+        }
       }
 
       function setFixedCTA() {
@@ -703,6 +812,7 @@
         setQR(js.booking_url || DEFAULT_BOOKING_URL);
         setFixedCTA();
         setToday(js);
+        loadMoonAstro();
 
         requestAnimationFrame(refreshGlass);
 
@@ -729,7 +839,10 @@
             headers: { Accept: "application/vnd.github+json" },
           });
 
-          if (!res.ok) return;
+          if (!res.ok) {
+            loadMoonAstro();
+            return;
+          }
 
           const data = await res.json();
 
@@ -737,7 +850,10 @@
             data.files &&
             (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
 
-          if (!file || !file.content) return;
+          if (!file || !file.content) {
+            loadMoonAstro();
+            return;
+          }
 
           const clean = stripJsonComments(file.content);
           const js = JSON.parse(clean);
@@ -745,6 +861,7 @@
           applyFromJson(js);
         } catch (e) {
           console.error("Status load error:", e);
+          loadMoonAstro();
         }
       }
 
