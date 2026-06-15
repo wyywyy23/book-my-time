@@ -342,6 +342,32 @@
         color: rgba(0, 0, 0, 0.58);
       }
 
+      .pollen-text {
+        display: grid;
+        gap: 4px;
+      }
+
+      .pollen-main,
+      .pollen-species {
+        display: block;
+      }
+
+      .pollen-mini-icon {
+        font-size: 0.78em !important;
+        line-height: 1;
+        color: rgba(0, 0, 0, 0.52) !important;
+        margin: 0 2px 0 0 !important;
+        transform: translateY(-0.03em);
+      }
+
+      .pollen-species {
+        font-size: 0.92em;
+        color: rgba(0, 0, 0, 0.58);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
       .forecast-strip {
         margin-top: 14px;
         display: grid;
@@ -438,12 +464,19 @@
                 </span>
               </div>
 
-              <div class="today-line">
+              <div class="today-line pollen-today-line">
                 <i class="fa-solid fa-seedling"></i>
-                <span>
-                  Tree <strong id="pollen-tree">—</strong> · Grass
-                  <strong id="pollen-grass">—</strong> · Weed
-                  <strong id="pollen-weed">—</strong>
+                <span class="pollen-text">
+                  <span class="pollen-main">
+                    <strong id="pollen-risk">—</strong>
+                    · <i class="fa-solid fa-tree pollen-mini-icon"></i>
+                    <strong id="pollen-tree">—</strong>
+                    · <i class="fa-solid fa-wheat-awn pollen-mini-icon"></i>
+                    <strong id="pollen-grass">—</strong>
+                    · <i class="fa-solid fa-leaf pollen-mini-icon"></i>
+                    <strong id="pollen-weed">—</strong>
+                  </span>
+                  <span class="pollen-species" id="pollen-species">—</span>
                 </span>
               </div>
 
@@ -765,12 +798,40 @@
       }
 
       function setPollenFallback() {
+        document.getElementById("pollen-risk").textContent = "—";
         document.getElementById("pollen-tree").textContent = "—";
         document.getElementById("pollen-grass").textContent = "—";
         document.getElementById("pollen-weed").textContent = "—";
+        document.getElementById("pollen-species").textContent = "—";
+      }
+
+      function formatPollenRiskLabel(value) {
+        const n = Number(value);
+
+        if (!Number.isFinite(n)) return "—";
+        if (n <= 0) return "None";
+        if (n <= 1) return "Very Low";
+        if (n <= 2) return "Low";
+        if (n <= 3) return "Moderate";
+        if (n <= 4) return "High";
+        return "Very High";
       }
 
       function setPollenFromValues(values) {
+        const tree = Number(values?.tree);
+        const grass = Number(values?.grass);
+        const weed = Number(values?.weed);
+
+        const maxRisk = Math.max(
+          Number.isFinite(tree) ? tree : 0,
+          Number.isFinite(grass) ? grass : 0,
+          Number.isFinite(weed) ? weed : 0,
+        );
+
+        document.getElementById("pollen-risk").textContent =
+          values?.riskLabel ||
+          formatPollenRiskLabel(values?.overall ?? maxRisk);
+
         document.getElementById("pollen-tree").textContent = formatPollenLevel(
           values?.tree,
         );
@@ -782,6 +843,13 @@
         document.getElementById("pollen-weed").textContent = formatPollenLevel(
           values?.weed,
         );
+
+        const species =
+          Array.isArray(values?.topSpecies) && values.topSpecies.length
+            ? values.topSpecies.slice(0, 3).join(" · ")
+            : "—";
+
+        document.getElementById("pollen-species").textContent = species;
       }
 
       function splitLatLon(location) {
@@ -895,14 +963,130 @@
         });
       }
 
+      function titleCaseSpeciesName(name) {
+        return String(name || "")
+          .replace(/_/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+      }
+
+      function pollenSpeciesNameFromItem(item, fallbackKey = "") {
+        return (
+          item?.display_name ||
+          item?.displayName ||
+          item?.name ||
+          item?.species ||
+          fallbackKey ||
+          ""
+        );
+      }
+
+      function pollenRawValueFromItem(item) {
+        const candidates = [
+          item?.value,
+          item?.concentration,
+          item?.count,
+          item?.grains,
+          item?.grains_per_m3,
+          item?.grainsPerM3,
+        ];
+
+        for (const candidate of candidates) {
+          const n = Number(candidate);
+          if (Number.isFinite(n)) return n;
+        }
+
+        const score = pollenScoreFromItem(item);
+        return score === null ? 0 : Number(score);
+      }
+
+      function collectTopPollenSpecies(node, out, fallbackKey = "") {
+        if (!node || typeof node !== "object") return;
+
+        if (Array.isArray(node)) {
+          node.forEach((item) => collectTopPollenSpecies(item, out));
+          return;
+        }
+
+        const category = pollenCategoryFromItem(node, fallbackKey);
+        const score = pollenScoreFromItem(node);
+        const rawValue = pollenRawValueFromItem(node);
+        const name = pollenSpeciesNameFromItem(node, fallbackKey);
+
+        if (category && score !== null && name) {
+          const cleaned = titleCaseSpeciesName(name);
+
+          if (
+            cleaned &&
+            !["Tree", "Grass", "Weed", "Pollen"].includes(cleaned)
+          ) {
+            out.push({
+              name: cleaned,
+              category,
+              score: Number(score),
+              rawValue: Number(rawValue) || 0,
+            });
+          }
+        }
+
+        Object.entries(node).forEach(([key, value]) => {
+          if (value && typeof value === "object") {
+            collectTopPollenSpecies(value, out, key);
+          }
+        });
+      }
+
+      function getTopPollenSpecies(data) {
+        const found = [];
+        collectTopPollenSpecies(data, found);
+
+        const deduped = new Map();
+
+        found.forEach((item) => {
+          const key = item.name.toLowerCase();
+          const prev = deduped.get(key);
+
+          if (
+            !prev ||
+            item.score > prev.score ||
+            (item.score === prev.score && item.rawValue > prev.rawValue)
+          ) {
+            deduped.set(key, item);
+          }
+        });
+
+        return [...deduped.values()]
+          .sort((a, b) => b.score - a.score || b.rawValue - a.rawValue)
+          .slice(0, 3)
+          .map((x) => x.name);
+      }
+
       function setPollenFromAtmospore(data) {
         const scores = {
           tree: null,
           grass: null,
           weed: null,
+          overall: null,
+          riskLabel: null,
+          topSpecies: [],
         };
 
         collectPollenScores(data, scores);
+
+        const topSpecies = getTopPollenSpecies(data);
+
+        const maxRisk = Math.max(
+          Number(scores.tree || 0),
+          Number(scores.grass || 0),
+          Number(scores.weed || 0),
+        );
+
+        scores.overall = maxRisk;
+        scores.riskLabel = formatPollenRiskLabel(maxRisk);
+        scores.topSpecies = topSpecies;
+
+        console.log("Parsed pollen display:", scores);
 
         setPollenFromValues(scores);
       }
