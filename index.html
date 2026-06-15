@@ -1430,6 +1430,9 @@
       }
 
       function applyFromJson(js) {
+        console.log("Gist parsed js:", js);
+        console.log("Gist status:", js.status);
+
         document.getElementById("status-sub").textContent =
           `as of ${formatMainUpdatedAt(js.updated_at)}`;
 
@@ -1437,9 +1440,6 @@
         setIdentityQuote(js);
         setQR(js.booking_url || DEFAULT_BOOKING_URL);
         setFixedCTA();
-
-        // Do not reset/reload Today here.
-        // Today APIs are launched once at startup.
 
         requestAnimationFrame(refreshGlass);
 
