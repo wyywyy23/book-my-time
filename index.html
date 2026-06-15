@@ -537,6 +537,9 @@
       const DEFAULT_BOOKING_URL =
         "https://app.reclaim.ai/m/yuyang-wang/flexible-quick-meeting";
 
+      const GIST_ID = "f96b0e927c21a42d247b626dceae243e";
+      const GIST_FILE = "status.json";
+      const STATUS_SOURCE = `https://api.github.com/gists/${GIST_ID}`;
       const ASSET_BASE = "https://wangyy.phd/book-my-time/";
 
       const API_PROXY_BASE =
@@ -545,7 +548,6 @@
       const MOON_LOCATION = "41.806634541194654,-72.25259166465403";
       const POLLEN_LOCATION = MOON_LOCATION;
 
-      const STATUS_PROXY_URL = `${API_PROXY_BASE}/status`;
       const POLLEN_PROXY_URL = `${API_PROXY_BASE}/pollen`;
       const MOON_PROXY_URL = `${API_PROXY_BASE}/moon`;
       const FORECAST_PROXY_URL = `${API_PROXY_BASE}/forecast`;
@@ -1428,9 +1430,6 @@
       }
 
       function applyFromJson(js) {
-        console.log("Gist parsed js:", js);
-        console.log("Gist status:", js.status);
-
         document.getElementById("status-sub").textContent =
           `as of ${formatMainUpdatedAt(js.updated_at)}`;
 
@@ -1439,19 +1438,12 @@
         setQR(js.booking_url || DEFAULT_BOOKING_URL);
         setFixedCTA();
 
+        // Do not reset/reload Today here.
+        // Today APIs are launched once at startup.
+
         requestAnimationFrame(refreshGlass);
 
         setTheme(js.status || "busy");
-      }
-
-      function setLoadingTheme() {
-        document.getElementById("status-text").textContent = "UPDATING";
-        document.getElementById("status-sub").textContent = "checking status";
-
-        const bg = document.getElementById("theme-bg");
-        bg.src = STATUS_MAP.busy.img;
-
-        requestAnimationFrame(refreshGlass);
       }
 
       async function load() {
@@ -1463,7 +1455,7 @@
 
         document.querySelector(".layout").style.visibility = "visible";
 
-        setLoadingTheme();
+        setTheme("busy");
 
         // Launch Today APIs immediately, in parallel with Gist.
         loadPollen();
@@ -1471,25 +1463,29 @@
         loadForecast();
 
         try {
-          const url = new URL(STATUS_PROXY_URL);
+          const url = new URL(STATUS_SOURCE);
           url.searchParams.set("_ts", Date.now());
 
           const res = await fetch(url.toString(), {
             cache: "no-store",
-            headers: {
-              Accept: "application/json",
-              "Cache-Control": "no-cache",
-              Pragma: "no-cache",
-            },
+            headers: { Accept: "application/vnd.github+json" },
           });
 
           if (!res.ok) {
-            console.error("Status proxy failed:", res.status, await res.text());
             return;
           }
 
-          const text = await res.text();
-          const clean = stripJsonComments(text);
+          const data = await res.json();
+
+          const file =
+            data.files &&
+            (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
+
+          if (!file || !file.content) {
+            return;
+          }
+
+          const clean = stripJsonComments(file.content);
           const js = JSON.parse(clean);
 
           applyFromJson(js);
