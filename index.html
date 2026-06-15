@@ -530,12 +530,16 @@
       const GIST_FILE = "status.json";
       const STATUS_SOURCE = `https://api.github.com/gists/${GIST_ID}`;
       const ASSET_BASE = "https://wangyy.phd/book-my-time/";
-      const WEATHER_API_KEY = "0e752e5637d946889eb05938261506";
-      const MOON_LOCATION = "41.806634541194654,-72.25259166465403";
-      const POLLEN_PROXY_URL =
-        "https://office-pollen-worker.wangyuyangyuyang.workers.dev/pollen";
 
+      const API_PROXY_BASE =
+        "https://office-pollen-worker.wangyuyangyuyang.workers.dev";
+
+      const MOON_LOCATION = "41.806634541194654,-72.25259166465403";
       const POLLEN_LOCATION = MOON_LOCATION;
+
+      const POLLEN_PROXY_URL = `${API_PROXY_BASE}/pollen`;
+      const MOON_PROXY_URL = `${API_PROXY_BASE}/moon`;
+      const FORECAST_PROXY_URL = `${API_PROXY_BASE}/forecast`;
 
       const STATUS_MAP = {
         busy: {
@@ -1108,8 +1112,6 @@
             `&dt=${encodeURIComponent(date)}` +
             `&_ts=${Date.now()}`;
 
-          console.log("Pollen proxy URL:", url);
-
           const res = await fetch(url, {
             cache: "no-store",
             headers: {
@@ -1117,18 +1119,9 @@
             },
           });
 
-          console.log("Pollen proxy status:", res.status, res.statusText);
-
-          const text = await res.text();
-          console.log("Pollen proxy raw text:", text);
-
           if (!res.ok) throw new Error(`Pollen proxy failed: ${res.status}`);
 
-          const data = JSON.parse(text);
-          window.__pollenRaw = data;
-
-          console.log("Pollen proxy JSON:", data);
-
+          const data = await res.json();
           setPollenFromAtmospore(data);
         } catch (e) {
           console.error("Pollen load error:", e);
@@ -1136,7 +1129,7 @@
         }
       }
 
-      function setToday(js) {
+      function setToday() {
         setPollenFallback();
         setMoonFallback();
         setForecastFallback();
@@ -1231,7 +1224,7 @@
       }
 
       async function loadMoonAstro() {
-        if (!WEATHER_API_KEY || WEATHER_API_KEY === "YOUR_WEATHERAPI_KEY") {
+        if (!MOON_PROXY_URL) {
           setMoonFallback();
           return;
         }
@@ -1239,15 +1232,20 @@
         const date = getLocalDateString();
 
         const url =
-          "https://api.weatherapi.com/v1/astronomy.json" +
-          `?key=${encodeURIComponent(WEATHER_API_KEY)}` +
-          `&q=${encodeURIComponent(MOON_LOCATION)}` +
+          MOON_PROXY_URL +
+          `?q=${encodeURIComponent(MOON_LOCATION)}` +
           `&dt=${encodeURIComponent(date)}` +
           `&_ts=${Date.now()}`;
 
         try {
-          const res = await fetch(url, { cache: "no-store" });
-          if (!res.ok) throw new Error(`Astronomy API failed: ${res.status}`);
+          const res = await fetch(url, {
+            cache: "no-store",
+            headers: {
+              accept: "application/json",
+            },
+          });
+
+          if (!res.ok) throw new Error(`Moon proxy failed: ${res.status}`);
 
           const data = await res.json();
           const astro = data?.astronomy?.astro;
@@ -1387,23 +1385,26 @@
       }
 
       async function loadForecast() {
-        if (!WEATHER_API_KEY || WEATHER_API_KEY === "YOUR_WEATHERAPI_KEY") {
+        if (!FORECAST_PROXY_URL) {
           setForecastFallback();
           return;
         }
 
         const url =
-          "https://api.weatherapi.com/v1/forecast.json" +
-          `?key=${encodeURIComponent(WEATHER_API_KEY)}` +
-          `&q=${encodeURIComponent(MOON_LOCATION)}` +
+          FORECAST_PROXY_URL +
+          `?q=${encodeURIComponent(MOON_LOCATION)}` +
           `&days=2` +
-          `&aqi=no` +
-          `&alerts=no` +
           `&_ts=${Date.now()}`;
 
         try {
-          const res = await fetch(url, { cache: "no-store" });
-          if (!res.ok) throw new Error(`Forecast API failed: ${res.status}`);
+          const res = await fetch(url, {
+            cache: "no-store",
+            headers: {
+              accept: "application/json",
+            },
+          });
+
+          if (!res.ok) throw new Error(`Forecast proxy failed: ${res.status}`);
 
           const data = await res.json();
           setForecastFromData(data);
@@ -1425,7 +1426,7 @@
         setIdentityQuote(js);
         setQR(js.booking_url || DEFAULT_BOOKING_URL);
         setFixedCTA();
-        setToday(js);
+        setToday();
         loadPollen();
         loadMoonAstro();
         loadForecast();
