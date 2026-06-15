@@ -499,6 +499,8 @@
       const ASSET_BASE = "https://wangyy.phd/book-my-time/";
       const WEATHER_API_KEY = "0e752e5637d946889eb05938261506";
       const MOON_LOCATION = "41.806634541194654,-72.25259166465403";
+      const POLLEN_API_KEY = "atmo_02c5df76eca094c87c715c47a1d05b1f";
+      const POLLEN_LOCATION = MOON_LOCATION;
 
       const STATUS_MAP = {
         busy: {
@@ -760,21 +762,188 @@
         return "5";
       }
 
-      function setToday(js) {
-        const pollen = js.pollen || {};
+      function setPollenFallback() {
+        document.getElementById("pollen-tree").textContent = "—";
+        document.getElementById("pollen-grass").textContent = "—";
+        document.getElementById("pollen-weed").textContent = "—";
+      }
 
+      function setPollenFromValues(values) {
         document.getElementById("pollen-tree").textContent = formatPollenLevel(
-          pollen.tree,
+          values?.tree,
         );
 
         document.getElementById("pollen-grass").textContent = formatPollenLevel(
-          pollen.grass,
+          values?.grass,
         );
 
         document.getElementById("pollen-weed").textContent = formatPollenLevel(
-          pollen.weed,
+          values?.weed,
         );
+      }
 
+      function splitLatLon(location) {
+        const [latRaw, lonRaw] = String(location || "")
+          .split(",")
+          .map((x) => x.trim());
+
+        const lat = Number(latRaw);
+        const lon = Number(lonRaw);
+
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+          throw new Error("Invalid pollen location");
+        }
+
+        return { lat, lon };
+      }
+
+      function pollenScoreFromRiskLevel(riskLevel) {
+        const r = String(riskLevel || "")
+          .trim()
+          .toLowerCase();
+
+        if (!r || r === "none" || r === "no risk") return 0;
+        if (r === "very low") return 1;
+        if (r === "low") return 2;
+        if (r === "moderate" || r === "medium") return 3;
+        if (r === "high") return 4;
+        if (r === "very high" || r === "severe") return 5;
+
+        return null;
+      }
+
+      function pollenScoreFromItem(item) {
+        const numericCandidates = [
+          item?.index,
+          item?.risk_index,
+          item?.riskIndex,
+          item?.score,
+          item?.level,
+        ];
+
+        for (const candidate of numericCandidates) {
+          const n = Number(candidate);
+          if (Number.isFinite(n))
+            return Math.max(0, Math.min(5, Math.round(n)));
+        }
+
+        const fromRisk = pollenScoreFromRiskLevel(
+          item?.risk_level || item?.riskLevel,
+        );
+        if (fromRisk !== null) return fromRisk;
+
+        return null;
+      }
+
+      function pollenCategoryFromItem(item, fallbackKey = "") {
+        const s = [
+          item?.category,
+          item?.type,
+          item?.species,
+          item?.name,
+          item?.display_name,
+          item?.displayName,
+          fallbackKey,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        if (s.includes("tree") || s.includes("oak") || s.includes("birch")) {
+          return "tree";
+        }
+
+        if (s.includes("grass")) {
+          return "grass";
+        }
+
+        if (
+          s.includes("weed") ||
+          s.includes("ragweed") ||
+          s.includes("mugwort")
+        ) {
+          return "weed";
+        }
+
+        return null;
+      }
+
+      function collectPollenScores(node, scores, fallbackKey = "") {
+        if (!node || typeof node !== "object") return;
+
+        if (Array.isArray(node)) {
+          node.forEach((item) => collectPollenScores(item, scores));
+          return;
+        }
+
+        const category = pollenCategoryFromItem(node, fallbackKey);
+        const score = pollenScoreFromItem(node);
+
+        if (category && score !== null) {
+          scores[category] = Math.max(
+            Number(scores[category] || 0),
+            Number(score),
+          );
+        }
+
+        Object.entries(node).forEach(([key, value]) => {
+          if (value && typeof value === "object") {
+            collectPollenScores(value, scores, key);
+          }
+        });
+      }
+
+      function setPollenFromAtmospore(data) {
+        const scores = {
+          tree: null,
+          grass: null,
+          weed: null,
+        };
+
+        collectPollenScores(data, scores);
+
+        setPollenFromValues(scores);
+      }
+
+      async function loadPollen() {
+        if (!POLLEN_API_KEY || POLLEN_API_KEY === "YOUR_ATMOSPORE_API_KEY") {
+          setPollenFallback();
+          return;
+        }
+
+        try {
+          const { lat, lon } = splitLatLon(POLLEN_LOCATION);
+          const date = getLocalDateString();
+
+          const url =
+            "https://pollenapi.com/v1/pollen" +
+            `?lon=${encodeURIComponent(lon)}` +
+            `&lat=${encodeURIComponent(lat)}` +
+            `&dt=${encodeURIComponent(date)}` +
+            `&forecast_days=1` +
+            `&species=${encodeURIComponent("tree,grass,weed")}` +
+            `&_ts=${Date.now()}`;
+
+          const res = await fetch(url, {
+            cache: "no-store",
+            headers: {
+              accept: "application/json",
+              "x-api-key": POLLEN_API_KEY,
+            },
+          });
+
+          if (!res.ok) throw new Error(`Pollen API failed: ${res.status}`);
+
+          const data = await res.json();
+          setPollenFromAtmospore(data);
+        } catch (e) {
+          console.error("Pollen load error:", e);
+          setPollenFallback();
+        }
+      }
+
+      function setToday(js) {
+        setPollenFallback();
         setMoonFallback();
         setForecastFallback();
       }
@@ -1063,6 +1232,7 @@
         setQR(js.booking_url || DEFAULT_BOOKING_URL);
         setFixedCTA();
         setToday(js);
+        loadPollen();
         loadMoonAstro();
         loadForecast();
 
@@ -1092,6 +1262,7 @@
           });
 
           if (!res.ok) {
+            loadPollen();
             loadMoonAstro();
             loadForecast();
             return;
@@ -1104,6 +1275,7 @@
             (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
 
           if (!file || !file.content) {
+            loadPollen();
             loadMoonAstro();
             loadForecast();
             return;
@@ -1115,6 +1287,7 @@
           applyFromJson(js);
         } catch (e) {
           console.error("Status load error:", e);
+          loadPollen();
           loadMoonAstro();
           loadForecast();
         }
