@@ -907,6 +907,7 @@
 
       async function loadPollen() {
         if (!POLLEN_API_KEY || POLLEN_API_KEY === "YOUR_ATMOSPORE_API_KEY") {
+          console.warn("Pollen: missing API key");
           setPollenFallback();
           return;
         }
@@ -924,6 +925,8 @@
             `&species=${encodeURIComponent("tree,grass,weed")}` +
             `&_ts=${Date.now()}`;
 
+          console.log("Pollen URL:", url);
+
           const res = await fetch(url, {
             cache: "no-store",
             headers: {
@@ -932,9 +935,18 @@
             },
           });
 
+          console.log("Pollen status:", res.status, res.statusText);
+
+          const text = await res.text();
+          console.log("Pollen raw text:", text);
+
           if (!res.ok) throw new Error(`Pollen API failed: ${res.status}`);
 
-          const data = await res.json();
+          const data = JSON.parse(text);
+          window.__pollenRaw = data;
+
+          console.log("Pollen JSON:", data);
+
           setPollenFromAtmospore(data);
         } catch (e) {
           console.error("Pollen load error:", e);
