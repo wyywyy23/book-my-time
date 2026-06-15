@@ -1437,10 +1437,9 @@
         setIdentityQuote(js);
         setQR(js.booking_url || DEFAULT_BOOKING_URL);
         setFixedCTA();
-        setToday();
-        loadPollen();
-        loadMoonAstro();
-        loadForecast();
+
+        // Do not reset/reload Today here.
+        // Today APIs are launched once at startup.
 
         requestAnimationFrame(refreshGlass);
 
@@ -1452,11 +1451,16 @@
         setOffice({});
         setIdentityQuote({});
         setFixedCTA();
-        setToday({});
+        setToday();
 
         document.querySelector(".layout").style.visibility = "visible";
 
         setTheme("busy");
+
+        // Launch Today APIs immediately, in parallel with Gist.
+        loadPollen();
+        loadMoonAstro();
+        loadForecast();
 
         try {
           const url = new URL(STATUS_SOURCE);
@@ -1468,9 +1472,6 @@
           });
 
           if (!res.ok) {
-            loadPollen();
-            loadMoonAstro();
-            loadForecast();
             return;
           }
 
@@ -1481,9 +1482,6 @@
             (data.files[GIST_FILE] || data.files[GIST_FILE.toUpperCase()]);
 
           if (!file || !file.content) {
-            loadPollen();
-            loadMoonAstro();
-            loadForecast();
             return;
           }
 
@@ -1493,9 +1491,6 @@
           applyFromJson(js);
         } catch (e) {
           console.error("Status load error:", e);
-          loadPollen();
-          loadMoonAstro();
-          loadForecast();
         }
       }
 
