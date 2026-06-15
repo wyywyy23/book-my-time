@@ -15,6 +15,11 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     />
 
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.12/css/weather-icons.min.css"
+    />
+
     <style>
       :root {
         --w: 1872;
@@ -375,7 +380,7 @@
               </div>
 
               <div class="today-line">
-                <i id="moon-icon" class="fa-regular fa-moon"></i>
+                <i id="moon-icon" class="wi wi-moon-alt-new"></i>
                 <span>
                   <strong id="moon-phase">—</strong>
                   · <strong id="moon-illumination">—</strong> · ↑
@@ -724,24 +729,27 @@
       function moonIconClassFromPhase(phase) {
         const p = String(phase || "").toLowerCase();
 
-        if (p.includes("new")) return "fa-solid fa-circle";
-        if (p.includes("full")) return "fa-regular fa-circle";
+        if (p.includes("new")) return "wi wi-moon-alt-new";
+        if (p.includes("waxing crescent"))
+          return "wi wi-moon-alt-waxing-crescent-3";
+        if (p.includes("first quarter")) return "wi wi-moon-alt-first-quarter";
+        if (p.includes("waxing gibbous"))
+          return "wi wi-moon-alt-waxing-gibbous-3";
+        if (p.includes("full")) return "wi wi-moon-alt-full";
+        if (p.includes("waning gibbous"))
+          return "wi wi-moon-alt-waning-gibbous-3";
+        if (p.includes("last quarter")) return "wi wi-moon-alt-third-quarter";
+        if (p.includes("waning crescent"))
+          return "wi wi-moon-alt-waning-crescent-3";
 
-        if (p.includes("first quarter"))
-          return "fa-solid fa-circle-half-stroke";
-        if (p.includes("last quarter")) return "fa-solid fa-circle-half-stroke";
-
-        if (p.includes("crescent")) return "fa-regular fa-moon";
-        if (p.includes("gibbous")) return "fa-solid fa-moon";
-
-        return "fa-regular fa-moon";
+        return "wi wi-moon-alt-new";
       }
 
       function setMoonFallback() {
         const moonIcon = document.getElementById("moon-icon");
 
         if (moonIcon) {
-          moonIcon.className = "fa-regular fa-moon";
+          moonIcon.className = "wi wi-moon-alt-new";
         }
 
         document.getElementById("moon-phase").textContent = "—";
