@@ -499,7 +499,9 @@
       const ASSET_BASE = "https://wangyy.phd/book-my-time/";
       const WEATHER_API_KEY = "0e752e5637d946889eb05938261506";
       const MOON_LOCATION = "41.806634541194654,-72.25259166465403";
-      const POLLEN_API_KEY = "atmo_02c5df76eca094c87c715c47a1d05b1f";
+      const POLLEN_PROXY_URL =
+        "office-pollen-worker.wangyuyangyuyang.workers.dev/pollen";
+
       const POLLEN_LOCATION = MOON_LOCATION;
 
       const STATUS_MAP = {
@@ -906,8 +908,7 @@
       }
 
       async function loadPollen() {
-        if (!POLLEN_API_KEY || POLLEN_API_KEY === "YOUR_ATMOSPORE_API_KEY") {
-          console.warn("Pollen: missing API key");
+        if (!POLLEN_PROXY_URL) {
           setPollenFallback();
           return;
         }
@@ -917,35 +918,32 @@
           const date = getLocalDateString();
 
           const url =
-            "https://pollenapi.com/v1/pollen" +
+            POLLEN_PROXY_URL +
             `?lon=${encodeURIComponent(lon)}` +
             `&lat=${encodeURIComponent(lat)}` +
             `&dt=${encodeURIComponent(date)}` +
-            `&forecast_days=1` +
-            `&species=${encodeURIComponent("tree,grass,weed")}` +
             `&_ts=${Date.now()}`;
 
-          console.log("Pollen URL:", url);
+          console.log("Pollen proxy URL:", url);
 
           const res = await fetch(url, {
             cache: "no-store",
             headers: {
               accept: "application/json",
-              "x-api-key": POLLEN_API_KEY,
             },
           });
 
-          console.log("Pollen status:", res.status, res.statusText);
+          console.log("Pollen proxy status:", res.status, res.statusText);
 
           const text = await res.text();
-          console.log("Pollen raw text:", text);
+          console.log("Pollen proxy raw text:", text);
 
-          if (!res.ok) throw new Error(`Pollen API failed: ${res.status}`);
+          if (!res.ok) throw new Error(`Pollen proxy failed: ${res.status}`);
 
           const data = JSON.parse(text);
           window.__pollenRaw = data;
 
-          console.log("Pollen JSON:", data);
+          console.log("Pollen proxy JSON:", data);
 
           setPollenFromAtmospore(data);
         } catch (e) {
