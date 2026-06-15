@@ -326,6 +326,21 @@
         font-weight: 820;
         color: rgba(0, 0, 0, 0.78);
       }
+
+      .moon-text {
+        display: grid;
+        gap: 4px;
+      }
+
+      .moon-main,
+      .moon-times {
+        display: block;
+      }
+
+      .moon-times {
+        font-size: 0.92em;
+        color: rgba(0, 0, 0, 0.58);
+      }
     </style>
   </head>
 
@@ -379,13 +394,17 @@
                 </span>
               </div>
 
-              <div class="today-line">
+              <div class="today-line moon-today-line">
                 <i id="moon-icon" class="wi wi-moon-alt-new"></i>
-                <span>
-                  <strong id="moon-phase">—</strong>
-                  · <strong id="moon-illumination">—</strong> · ↑
-                  <strong id="moonrise">—</strong> · ↓
-                  <strong id="moonset">—</strong>
+                <span class="moon-text">
+                  <span class="moon-main">
+                    <strong id="moon-phase">—</strong>
+                    · <strong id="moon-illumination">—</strong>
+                  </span>
+                  <span class="moon-times">
+                    ↑ <strong id="moonrise">—</strong> · ↓
+                    <strong id="moonset">—</strong>
+                  </span>
                 </span>
               </div>
             </div>
